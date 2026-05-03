@@ -46,7 +46,9 @@ fn create_app(app_state: web::Data<AppState>) -> actix_web::App<
         .service(
             web::scope("/api")
                 .wrap(auth)
-                .configure(handlers::auth::protected_routes),
+                .configure(handlers::auth::protected_routes)
+                .configure(handlers::plugin::protected_routes)
+                .configure(handlers::library_item::protected_routes),
         )
 }
 

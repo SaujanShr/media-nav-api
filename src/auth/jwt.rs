@@ -18,6 +18,9 @@ const TOKEN_EXPIRY_SECS: u64 = 24 * 60 * 60; // 24 hours
 // ── Public ────────────────────────────────────────────────────────────────────
 
 pub fn create_token(user_id: &str, username: &str, secret: &str) -> Result<String, jsonwebtoken::errors::Error> {
+    let header = Header::new(Algorithm::HS512);
+    let encoding_key = EncodingKey::from_secret(secret.as_bytes());
+
     let iat = get_current_timestamp();
     let claims = Claims {
         sub: user_id.to_owned(),
@@ -25,9 +28,6 @@ pub fn create_token(user_id: &str, username: &str, secret: &str) -> Result<Strin
         iat,
         exp: iat + TOKEN_EXPIRY_SECS,
     };
-
-    let header = Header::new(Algorithm::HS512);
-    let encoding_key = EncodingKey::from_secret(secret.as_bytes());
 
     encode(
         &header,

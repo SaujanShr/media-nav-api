@@ -5,4 +5,3 @@ pub async fn run_migrations(pool: &PgPool) -> Result<(), sqlx::migrate::MigrateE
         .run(pool)
         .await
 }
-

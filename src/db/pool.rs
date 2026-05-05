@@ -1,8 +1,14 @@
-use sqlx::{PgPool, postgres::PgPoolOptions};
+use sqlx::{PgPool, postgres::PgPoolOptions, Error};
 
-pub async fn create_pool(database_url: &str) -> Result<PgPool, sqlx::Error> {
+// ── Config ────────────────────────────────────────────────────────────────────
+
+const MAX_CONNECTIONS: u32 = 5;
+
+// ── Public ────────────────────────────────────────────────────────────────────
+
+pub async fn create_pool(database_url: &str) -> Result<PgPool, Error> {
     PgPoolOptions::new()
-        .max_connections(5)
+        .max_connections(MAX_CONNECTIONS)
         .connect(database_url)
         .await
 }

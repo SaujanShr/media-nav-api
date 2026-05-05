@@ -1,10 +1,10 @@
-use sqlx::PgPool;
+use sqlx::{PgPool, Error, query, query_as};
 
 use crate::models::library_item::UserLibraryItem;
 
-pub async fn list(pool: &PgPool, user_plugin_id: &str) -> Result<Vec<UserLibraryItem>, sqlx::Error> {
-    sqlx::query_as::<_, UserLibraryItem>("
-        SELECT   id, user_plugin_id, library_item_id
+pub async fn list(pool: &PgPool, user_plugin_id: &str) -> Result<Vec<UserLibraryItem>, Error> {
+    query_as::<_, UserLibraryItem>("
+        SELECT   id, user_plugin_id, library_item_id, last_accessed
         FROM     user_library_items
         WHERE    user_plugin_id = $1
         ")
@@ -18,11 +18,11 @@ pub async fn add(
     id: &str,
     user_plugin_id: &str,
     library_item_id: &str,
-) -> Result<UserLibraryItem, sqlx::Error> {
-    sqlx::query_as::<_, UserLibraryItem>("
+) -> Result<UserLibraryItem, Error> {
+    query_as::<_, UserLibraryItem>("
         INSERT INTO user_library_items (id, user_plugin_id, library_item_id)
         VALUES ($1, $2, $3)
-        RETURNING id, user_plugin_id, library_item_id
+        RETURNING id, user_plugin_id, library_item_id, last_accessed
         ")
         .bind(id)
         .bind(user_plugin_id)
@@ -31,8 +31,8 @@ pub async fn add(
         .await
 }
 
-pub async fn remove(pool: &PgPool, user_plugin_id: &str, library_item_id: &str) -> Result<bool, sqlx::Error> {
-    let result = sqlx::query("
+pub async fn remove(pool: &PgPool, user_plugin_id: &str, library_item_id: &str) -> Result<bool, Error> {
+    let result = query("
         DELETE FROM user_library_items
         WHERE  user_plugin_id = $1
         AND    library_item_id = $2
@@ -44,4 +44,3 @@ pub async fn remove(pool: &PgPool, user_plugin_id: &str, library_item_id: &str) 
 
     Ok(result.rows_affected() > 0)
 }
-

@@ -1,10 +1,10 @@
-use sqlx::PgPool;
+use sqlx::{PgPool, Error, query, query_as};
 
 use crate::models::user::User;
 
-pub async fn find_by_username(pool: &PgPool, username: &str) -> Result<Option<User>, sqlx::Error> {
-    sqlx::query_as::<_, User>("
-        SELECT   id, username, password_hash
+pub async fn find_by_username(pool: &PgPool, username: &str) -> Result<Option<User>, Error> {
+    query_as::<_, User>("
+        SELECT   id, username, password_hash, created_at
         FROM     users
         WHERE    username = $1
         ")
@@ -18,8 +18,8 @@ pub async fn create(
     id: &str,
     username: &str,
     password_hash: &str,
-) -> Result<(), sqlx::Error> {
-    sqlx::query("
+) -> Result<(), Error> {
+    query("
         INSERT INTO users (id, username, password_hash)
         VALUES ($1, $2, $3)
         ")
@@ -30,4 +30,3 @@ pub async fn create(
         .await?;
     Ok(())
 }
-

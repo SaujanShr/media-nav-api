@@ -35,6 +35,7 @@ async fn resolve_plugin(pool: &PgPool, user_plugin_id: &str, user_id: &str) -> R
 
 pub async fn list(pool: &PgPool, user_plugin_id: &str, user_id: &str) -> Result<Vec<UserLibraryItem>, LibraryItemError> {
     resolve_plugin(pool, user_plugin_id, user_id).await?;
+
     library_item_repo::list(pool, user_plugin_id)
         .await
         .map_err(|_| LibraryItemError::Internal)
@@ -44,6 +45,7 @@ pub async fn add(pool: &PgPool, user_plugin_id: &str, user_id: &str, library_ite
     resolve_plugin(pool, user_plugin_id, user_id).await?;
 
     let id = Uuid::new_v4().to_string();
+
     library_item_repo::add(pool, &id, user_plugin_id, library_item_id)
         .await
         .map_err(|e| {

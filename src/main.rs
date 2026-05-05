@@ -7,14 +7,16 @@ mod repositories;
 mod services;
 mod state;
 
-use actix_web::{web, App, HttpServer};
+use actix_web::{web, App, HttpServer, Error};
+use actix_web::dev::{ServiceFactory, ServiceRequest, ServiceResponse};
 use actix_web_httpauth::middleware::HttpAuthentication;
+use sqlx::PgPool;
 use auth::bearer_validator;
 use config::Config;
 use state::AppState;
 
 
-async fn init_db(database_url: &str) -> sqlx::PgPool {
+async fn init_db(database_url: &str) -> PgPool {
     let pool = db::create_pool(database_url)
         .await
         .expect("Failed to connect to PostgreSQL");
@@ -26,12 +28,12 @@ async fn init_db(database_url: &str) -> sqlx::PgPool {
     pool
 }
 
-fn create_app(app_state: web::Data<AppState>) -> actix_web::App<
-    impl actix_web::dev::ServiceFactory<
-        actix_web::dev::ServiceRequest,
+fn create_app(app_state: web::Data<AppState>) -> App<
+    impl ServiceFactory<
+        ServiceRequest,
         Config = (),
-        Response = actix_web::dev::ServiceResponse,
-        Error = actix_web::Error,
+        Response = ServiceResponse,
+        Error = Error,
         InitError = (),
     >,
 > {
@@ -42,13 +44,15 @@ fn create_app(app_state: web::Data<AppState>) -> actix_web::App<
         // ── Public routes (no token required) ─────────────────────────
         .configure(handlers::health::public_routes)
         .configure(handlers::auth::public_routes)
+        .configure(handlers::plugin::public_routes)
         // ── Protected routes (token required) ─────────────────────────
         .service(
             web::scope("/api")
                 .wrap(auth)
                 .configure(handlers::auth::protected_routes)
                 .configure(handlers::plugin::protected_routes)
-                .configure(handlers::library_item::protected_routes),
+                .configure(handlers::library_item::protected_routes)
+                .configure(handlers::settings::protected_routes)
         )
 }
 

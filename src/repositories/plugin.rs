@@ -1,10 +1,31 @@
-use sqlx::PgPool;
+use sqlx::{PgPool, Error, query, query_as};
 
-use crate::models::plugin::UserPlugin;
+use crate::models::plugin::{Plugin, UserPlugin};
 
-pub async fn find_by_id(pool: &PgPool, id: &str) -> Result<Option<UserPlugin>, sqlx::Error> {
-    sqlx::query_as::<_, UserPlugin>("
-        SELECT   id, user_id, plugin_id, version_id
+pub async fn list_all(pool: &PgPool) -> Result<Vec<Plugin>, Error> {
+    query_as::<_, Plugin>("
+        SELECT   id, version, nsfw
+        FROM     plugins
+        ORDER BY id
+        ")
+        .fetch_all(pool)
+        .await
+}
+
+pub async fn find_plugin_by_id(pool: &PgPool, id: &str) -> Result<Option<Plugin>, Error> {
+    query_as::<_, Plugin>("
+        SELECT   id, version, nsfw
+        FROM     plugins
+        WHERE    id = $1
+        ")
+        .bind(id)
+        .fetch_optional(pool)
+        .await
+}
+
+pub async fn find_by_id(pool: &PgPool, id: &str) -> Result<Option<UserPlugin>, Error> {
+    query_as::<_, UserPlugin>("
+        SELECT   id, user_id, plugin_id, last_accessed
         FROM     user_plugins
         WHERE    id = $1
         ")
@@ -13,9 +34,9 @@ pub async fn find_by_id(pool: &PgPool, id: &str) -> Result<Option<UserPlugin>, s
         .await
 }
 
-pub async fn list(pool: &PgPool, user_id: &str) -> Result<Vec<UserPlugin>, sqlx::Error> {
-    sqlx::query_as::<_, UserPlugin>("
-        SELECT   id, user_id, plugin_id, version_id
+pub async fn list(pool: &PgPool, user_id: &str) -> Result<Vec<UserPlugin>, Error> {
+    query_as::<_, UserPlugin>("
+        SELECT   id, user_id, plugin_id, last_accessed
         FROM     user_plugins
         WHERE    user_id = $1
         ")
@@ -29,23 +50,21 @@ pub async fn install(
     id: &str,
     user_id: &str,
     plugin_id: &str,
-    version_id: &str,
-) -> Result<UserPlugin, sqlx::Error> {
-    sqlx::query_as::<_, UserPlugin>("
-        INSERT INTO user_plugins (id, user_id, plugin_id, version_id)
-        VALUES ($1, $2, $3, $4)
-        RETURNING id, user_id, plugin_id, version_id
+) -> Result<UserPlugin, Error> {
+    query_as::<_, UserPlugin>("
+        INSERT INTO user_plugins (id, user_id, plugin_id)
+        VALUES ($1, $2, $3)
+        RETURNING id, user_id, plugin_id, last_accessed
         ")
         .bind(id)
         .bind(user_id)
         .bind(plugin_id)
-        .bind(version_id)
         .fetch_one(pool)
         .await
 }
 
-pub async fn uninstall(pool: &PgPool, user_id: &str, plugin_id: &str) -> Result<bool, sqlx::Error> {
-    let result = sqlx::query("
+pub async fn uninstall(pool: &PgPool, user_id: &str, plugin_id: &str) -> Result<bool, Error> {
+    let result = query("
         DELETE FROM user_plugins
         WHERE  user_id = $1
         AND    plugin_id = $2

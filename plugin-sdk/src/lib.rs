@@ -1,44 +1,41 @@
 use serde::Serialize;
 
 /// Descriptive information about a plugin, shown in catalogues and UIs.
-#[derive(Serialize)]
+#[derive(Serialize, Clone, Copy)]
 pub struct PluginMetadata {
-    pub name: String,
-    pub description: String,
-    pub category: String,
-    pub nsfw: bool,
+    pub name:        &'static str,
+    pub description: &'static str,
+    pub category:    &'static str,
+    pub nsfw:        bool,
 }
 
 /// Static assets the plugin ships — loaded by the frontend at runtime.
-#[derive(Serialize)]
+#[derive(Serialize, Clone, Copy)]
 pub struct PluginResources {
-    pub script_url: String,
-    pub style_url: Option<String>,
-    pub icon_url: String,
-    pub banner_url: String,
+    pub icon_url:   &'static str,
+    pub banner_url: &'static str,
 }
 
-/// The interface every plugin shared library must implement.
+/// The universal concrete plugin type.
 ///
-/// # Building a plugin
-///
-/// Create a `cdylib` crate that depends on `plugin-sdk`, implement
-/// `PluginInstance`, and export a `create_plugin` symbol:
+/// Every plugin's `create_plugin` entry-point returns a heap-allocated `Plugin`.
+/// The server deserializes it directly — no custom struct or trait impl needed.
 ///
 /// ```rust
-/// #[no_mangle]
-/// pub extern "C" fn create_plugin() -> *mut std::ffi::c_void {
-///     let plugin: Box<dyn PluginInstance> = Box::new(MyPlugin::new());
-///     Box::into_raw(Box::new(plugin)) as *mut std::ffi::c_void
+/// #[unsafe(no_mangle)]
+/// pub extern "C" fn create_plugin() -> *mut Plugin {
+///     Box::into_raw(Box::new(Plugin {
+///         id:        "my-plugin",
+///         version:   "1.0.0",
+///         metadata:  PluginMetadata { ... },
+///         resources: PluginResources { ... },
+///     }))
 /// }
 /// ```
-///
-/// Place the compiled `.so` / `.dylib` in the directory pointed to by
-/// `PLUGINS_DIR` and it will be picked up on the next server start.
-pub trait PluginInstance: Send + Sync {
-    fn id(&self) -> &str;
-    fn version(&self) -> &str;
-    fn metadata(&self) -> &PluginMetadata;
-    fn resources(&self) -> &PluginResources;
+#[derive(Serialize, Clone, Copy)]
+pub struct Plugin {
+    pub id:        &'static str,
+    pub version:   &'static str,
+    pub metadata:  PluginMetadata,
+    pub resources: PluginResources,
 }
-

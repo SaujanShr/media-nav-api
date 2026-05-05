@@ -1,5 +1,5 @@
 mod instance;
 mod registry;
 
-pub use instance::{PluginInstance, PluginMetadata, PluginResources};
+pub use instance::Plugin;
 pub use registry::PluginRegistry;

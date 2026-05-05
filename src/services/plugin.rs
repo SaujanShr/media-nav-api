@@ -1,8 +1,8 @@
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::models::plugin::{PluginDto, UserPlugin};
-use crate::plugins::PluginRegistry;
+use crate::models::plugin::UserPlugin;
+use crate::plugins::{Plugin, PluginRegistry};
 use crate::repositories::plugin as plugin_repo;
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -16,16 +16,8 @@ pub enum PluginError {
 
 // ── Public API ────────────────────────────────────────────────────────────────
 
-pub fn list_all(registry: &PluginRegistry) -> Vec<PluginDto<'_>> {
-    registry.loaded_ids()
-        .filter_map(|id| registry.get(id))
-        .map(|p| PluginDto {
-            id: p.id(),
-            version: p.version(),
-            metadata: p.metadata(),
-            resources: p.resources(),
-        })
-        .collect()
+pub fn list_all(registry: &PluginRegistry) -> Vec<&Plugin> {
+    registry.plugins().collect()
 }
 
 pub async fn list(pool: &PgPool, user_id: &str) -> Result<Vec<UserPlugin>, PluginError> {
@@ -68,5 +60,3 @@ pub async fn set_enabled(
         .map_err(|_| PluginError::Internal)?
         .ok_or(PluginError::NotFound)
 }
-
-

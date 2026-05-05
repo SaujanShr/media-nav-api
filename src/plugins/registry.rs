@@ -3,13 +3,12 @@ use std::path::Path;
 use std::fmt;
 use std::io;
 use std::fs;
-use std::ffi;
 
 use libloading::{Library, Symbol};
 
-use super::PluginInstance;
+use plugin_sdk::Plugin;
 
-type CreatePluginFn = unsafe extern "C" fn() -> *mut ffi::c_void;
+type CreatePluginFn = unsafe extern "C" fn() -> *mut Plugin;
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -29,32 +28,36 @@ impl fmt::Display for RegistryError {
 }
 
 impl From<io::Error> for RegistryError {
-    fn from(e: io::Error) -> Self {
-        RegistryError::Io(e)
-    }
+    fn from(e: io::Error) -> Self { RegistryError::Io(e) }
 }
 impl From<libloading::Error> for RegistryError {
-    fn from(e: libloading::Error) -> Self {
-        RegistryError::Load(e)
-    }
+    fn from(e: libloading::Error) -> Self { RegistryError::Load(e) }
 }
 
 // ── Registry ──────────────────────────────────────────────────────────────────
 
 pub struct PluginRegistry {
     _libraries: Vec<Library>,
-    plugins: HashMap<String, Box<dyn PluginInstance>>,
+    plugins: HashMap<String, Plugin>,
 }
 
 impl PluginRegistry {
     pub fn load_from_dir(dir: &Path) -> Self {
         let mut libraries = Vec::new();
-        let mut plugins: HashMap<String, Box<dyn PluginInstance>> = HashMap::new();
+        let mut plugins: HashMap<String, Plugin> = HashMap::new();
 
         let ext = if cfg!(target_os = "macos") { "dylib" } else { "so" };
 
         let entries = match fs::read_dir(dir) {
             Ok(e)  => e,
+            Err(e) if e.kind() == io::ErrorKind::NotFound => {
+                if let Err(e) = fs::create_dir_all(dir) {
+                    eprintln!("[plugins] Could not create plugins directory {:?}: {e}", dir);
+                } else {
+                    println!("[plugins] Created plugins directory {:?}", dir);
+                }
+                return PluginRegistry { _libraries: libraries, plugins };
+            }
             Err(e) => {
                 eprintln!("[plugins] Cannot read plugins directory {:?}: {e}", dir);
                 return PluginRegistry { _libraries: libraries, plugins };
@@ -68,22 +71,24 @@ impl PluginRegistry {
         PluginRegistry { _libraries: libraries, plugins }
     }
 
-    pub fn get(&self, id: &str) -> Option<&dyn PluginInstance> {
-        self.plugins.get(id).map(|p| p.as_ref())
+    pub fn get(&self, id: &str) -> Option<&Plugin> {
+        self.plugins.get(id)
     }
 
     pub fn is_loaded(&self, id: &str) -> bool {
         self.plugins.contains_key(id)
     }
 
-    pub fn loaded_ids(&self) -> impl Iterator<Item = &str> {
-        self.plugins.keys().map(String::as_str)
+    pub fn plugins(&self) -> impl Iterator<Item = &Plugin> {
+        self.plugins.values()
     }
+
+    // ── Private ───────────────────────────────────────────────────────────────
 
     fn try_load_entry(
         entry: &fs::DirEntry,
         ext: &str,
-        plugins: &mut HashMap<String, Box<dyn PluginInstance>>,
+        plugins: &mut HashMap<String, Plugin>,
         libraries: &mut Vec<Library>,
     ) {
         let path = entry.path();
@@ -94,21 +99,20 @@ impl PluginRegistry {
 
         match Self::load(&path) {
             Ok((lib, plugin)) => {
-                println!("[plugins] Loaded \"{}\" from {:?}", plugin.id(), path);
-                plugins.insert(plugin.id().to_string(), plugin);
+                println!("[plugins] Loaded \"{}\" from {:?}", plugin.id, path);
+                plugins.insert(plugin.id.to_string(), plugin);
                 libraries.push(lib);
             }
             Err(e) => eprintln!("[plugins] Failed to load {:?}: {e}", path),
         }
     }
 
-    fn load(path: &Path) -> Result<(Library, Box<dyn PluginInstance>), RegistryError> {
+    fn load(path: &Path) -> Result<(Library, Plugin), RegistryError> {
         unsafe {
             let lib = Library::new(path)?;
             let create: Symbol<CreatePluginFn> = lib.get(b"create_plugin")?;
-            let plugin = *Box::from_raw(create() as *mut Box<dyn PluginInstance>);
+            let plugin = *Box::from_raw(create());
             Ok((lib, plugin))
         }
     }
 }
-

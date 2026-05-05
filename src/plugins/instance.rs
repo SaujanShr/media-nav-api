@@ -1,1 +1,1 @@
-pub use plugin_sdk::{PluginInstance, PluginMetadata, PluginResources};
+pub use plugin_sdk::{Plugin, PluginMetadata, PluginResources};

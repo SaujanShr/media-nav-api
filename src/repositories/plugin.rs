@@ -1,27 +1,6 @@
 use sqlx::{PgPool, Error, query, query_as};
 
-use crate::models::plugin::{Plugin, UserPlugin};
-
-pub async fn list_all(pool: &PgPool) -> Result<Vec<Plugin>, Error> {
-    query_as::<_, Plugin>("
-        SELECT   id, version, nsfw
-        FROM     plugins
-        ORDER BY id
-        ")
-        .fetch_all(pool)
-        .await
-}
-
-pub async fn find_plugin_by_id(pool: &PgPool, id: &str) -> Result<Option<Plugin>, Error> {
-    query_as::<_, Plugin>("
-        SELECT   id, version, nsfw
-        FROM     plugins
-        WHERE    id = $1
-        ")
-        .bind(id)
-        .fetch_optional(pool)
-        .await
-}
+use crate::models::plugin::UserPlugin;
 
 pub async fn find_by_id(pool: &PgPool, id: &str) -> Result<Option<UserPlugin>, Error> {
     query_as::<_, UserPlugin>("
@@ -96,5 +75,3 @@ pub async fn set_enabled(
         .fetch_optional(pool)
         .await
 }
-
-

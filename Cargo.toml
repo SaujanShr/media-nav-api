@@ -1,9 +1,14 @@
+[workspace]
+members = [".", "plugin-sdk", "plugins/example"]
+resolver = "2"
+
 [package]
 name = "media-nav-web"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+plugin-sdk = { path = "plugin-sdk" }
 actix-web = "4.13.0"
 actix-web-httpauth = "0.8.2"
 serde = { version = "1.0.228", features = ["derive"] }
@@ -14,3 +19,4 @@ uuid = { version = "1.23.1", features = ["v4"] }
 sqlx = { version = "0.8.6", features = ["runtime-tokio-native-tls", "postgres", "migrate", "chrono"] }
 chrono = { version = "0.4.44", features = ["serde"] }
 dotenvy = "0.15"
+libloading = "0.8"

@@ -2,11 +2,15 @@ use sqlx::FromRow;
 use serde::Serialize;
 use chrono::{DateTime, Utc};
 
-#[derive(FromRow, Serialize)]
-pub struct Plugin {
-    pub id: String,
-    pub version: String,
-    pub nsfw: bool,
+use crate::plugins::{PluginMetadata, PluginResources};
+
+/// Returned by `GET /plugins/all` — built from the live plugin registry.
+#[derive(Serialize)]
+pub struct PluginDto<'a> {
+    pub id: &'a str,
+    pub version: &'a str,
+    pub metadata: &'a PluginMetadata,
+    pub resources: &'a PluginResources,
 }
 
 #[derive(FromRow, Serialize)]

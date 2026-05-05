@@ -6,10 +6,9 @@ CREATE TABLE IF NOT EXISTS playlists (
 );
 
 CREATE TABLE IF NOT EXISTS playlist_items (
-    id                   TEXT    PRIMARY KEY,
-    playlist_id          TEXT    NOT NULL REFERENCES playlists(id) ON DELETE CASCADE,
-    user_library_item_id TEXT    NOT NULL REFERENCES user_library_items(id) ON DELETE CASCADE,
-    index                FLOAT8  NOT NULL DEFAULT 0,
+    id                   TEXT   PRIMARY KEY,
+    playlist_id          TEXT   NOT NULL REFERENCES playlists(id) ON DELETE CASCADE,
+    user_library_item_id TEXT   NOT NULL REFERENCES user_library_items(id) ON DELETE CASCADE,
+    index                FLOAT8 NOT NULL DEFAULT 0,
     UNIQUE (playlist_id, user_library_item_id)
 );
-

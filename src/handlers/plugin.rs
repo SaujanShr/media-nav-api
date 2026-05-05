@@ -37,10 +37,7 @@ fn error_response(err: PluginError) -> HttpResponse {
 /// `GET /plugins/all`
 #[get("/plugins/all")]
 async fn list_all(state: Data<AppState>) -> impl Responder {
-    match plugin_service::list_all(&state.db).await {
-        Ok(plugins) => HttpResponse::Ok().json(plugins),
-        Err(e) => error_response(e),
-    }
+    HttpResponse::Ok().json(plugin_service::list_all(&state.plugins))
 }
 
 /// `GET /api/plugins`
@@ -83,12 +80,7 @@ async fn uninstall(req: HttpRequest, state: Data<AppState>, path: Path<String>) 
 ///
 /// Body: `{ "enabled": true }`
 #[patch("/plugins/{plugin_id}")]
-async fn set_enabled(
-    req: HttpRequest,
-    state: Data<AppState>,
-    path: Path<String>,
-    body: Json<SetEnabledRequest>,
-) -> impl Responder {
+async fn set_enabled(req: HttpRequest, state: Data<AppState>, path: Path<String>, body: Json<SetEnabledRequest>) -> impl Responder {
     let plugin_id = path.into_inner();
     let user_id = assert_ok!(user_id(&req));
 

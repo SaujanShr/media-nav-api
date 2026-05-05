@@ -17,7 +17,6 @@ pub enum LibraryItemError {
 
 // ── Private ───────────────────────────────────────────────────────────────────
 
-/// Resolves `user_plugin_id`, verifying it exists and belongs to `user_id`.
 async fn resolve_plugin(pool: &PgPool, user_plugin_id: &str, user_id: &str) -> Result<(), LibraryItemError> {
     let plugin = plugin_repo::find_by_id(pool, user_plugin_id)
         .await

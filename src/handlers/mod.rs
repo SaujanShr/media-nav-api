@@ -10,5 +10,6 @@ macro_rules! assert_ok {
 pub mod auth;
 pub mod health;
 pub mod library_item;
+pub mod playlist;
 pub mod plugin;
 pub mod settings;

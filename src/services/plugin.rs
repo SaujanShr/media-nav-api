@@ -55,4 +55,16 @@ pub async fn uninstall(pool: &PgPool, user_id: &str, plugin_id: &str) -> Result<
     if deleted { Ok(()) } else { Err(PluginError::NotFound) }
 }
 
+pub async fn set_enabled(
+    pool: &PgPool,
+    user_id: &str,
+    plugin_id: &str,
+    enabled: bool,
+) -> Result<UserPlugin, PluginError> {
+    plugin_repo::set_enabled(pool, user_id, plugin_id, enabled)
+        .await
+        .map_err(|_| PluginError::Internal)?
+        .ok_or(PluginError::NotFound)
+}
+
 

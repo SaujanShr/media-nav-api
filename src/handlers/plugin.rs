@@ -1,4 +1,4 @@
-use actix_web::{delete, get, post, HttpRequest, HttpResponse, Responder};
+use actix_web::{delete, get, patch, post, HttpRequest, HttpResponse, Responder};
 use actix_web::web::{Data, Json, Path, ServiceConfig};
 use serde::Deserialize;
 use serde_json::json;
@@ -12,6 +12,11 @@ use crate::state::AppState;
 #[derive(Deserialize)]
 struct InstallRequest {
     plugin_id: String,
+}
+
+#[derive(Deserialize)]
+struct SetEnabledRequest {
+    enabled: bool,
 }
 
 // ── Private ───────────────────────────────────────────────────────────────────
@@ -74,6 +79,25 @@ async fn uninstall(req: HttpRequest, state: Data<AppState>, path: Path<String>) 
     }
 }
 
+/// `PATCH /api/plugins/{plugin_id}`
+///
+/// Body: `{ "enabled": true }`
+#[patch("/plugins/{plugin_id}")]
+async fn set_enabled(
+    req: HttpRequest,
+    state: Data<AppState>,
+    path: Path<String>,
+    body: Json<SetEnabledRequest>,
+) -> impl Responder {
+    let plugin_id = path.into_inner();
+    let user_id = assert_ok!(user_id(&req));
+
+    match plugin_service::set_enabled(&state.db, &user_id, &plugin_id, body.enabled).await {
+        Ok(plugin) => HttpResponse::Ok().json(plugin),
+        Err(e) => error_response(e),
+    }
+}
+
 // ── Public ────────────────────────────────────────────────────────────────────
 
 pub fn public_routes(cfg: &mut ServiceConfig) {
@@ -84,5 +108,6 @@ pub fn protected_routes(cfg: &mut ServiceConfig) {
     cfg
         .service(list)
         .service(install)
-        .service(uninstall);
+        .service(uninstall)
+        .service(set_enabled);
 }

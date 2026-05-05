@@ -15,4 +15,5 @@ pub struct UserPlugin {
     pub user_id: String,
     pub plugin_id: String,
     pub last_accessed: DateTime<Utc>,
+    pub enabled: bool,
 }

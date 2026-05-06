@@ -83,7 +83,7 @@ async fn normalize(
     Ok(target_index(&clean_indices, index))
 }
 
-// ── Public API ────────────────────────────────────────────────────────────────
+// ── Public ────────────────────────────────────────────────────────────────────
 
 pub async fn list(pool: &PgPool, user_id: &str) -> Result<Vec<Playlist>, PlaylistError> {
     playlist_repo::list(pool, user_id)

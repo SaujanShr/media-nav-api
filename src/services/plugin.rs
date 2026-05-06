@@ -17,7 +17,7 @@ pub enum PluginError {
     Internal,
 }
 
-// ── Public API ────────────────────────────────────────────────────────────────
+// ── Public ────────────────────────────────────────────────────────────────────
 
 pub fn list_all(registry: &PluginRegistry) -> Vec<&Plugin> {
     registry.plugins().collect()

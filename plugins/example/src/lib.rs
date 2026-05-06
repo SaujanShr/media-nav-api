@@ -49,7 +49,7 @@ fn mock_enrich(id: &str) -> Option<LibraryItemDetail> {
     }
 }
 
-// ── Entry-point ───────────────────────────────────────────────────────────────
+// ── Public ────────────────────────────────────────────────────────────────────
 
 #[unsafe(no_mangle)]
 pub extern "C" fn create_plugin() -> *mut Plugin {

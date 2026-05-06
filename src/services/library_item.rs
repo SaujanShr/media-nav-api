@@ -30,7 +30,7 @@ async fn resolve_plugin(pool: &PgPool, user_plugin_id: &str, user_id: &str) -> R
     Ok(())
 }
 
-// ── Public API ────────────────────────────────────────────────────────────────
+// ── Public ────────────────────────────────────────────────────────────────────
 
 pub async fn list(pool: &PgPool, user_plugin_id: &str, user_id: &str) -> Result<Vec<UserLibraryItem>, LibraryItemError> {
     resolve_plugin(pool, user_plugin_id, user_id).await?;

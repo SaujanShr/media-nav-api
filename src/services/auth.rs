@@ -32,7 +32,7 @@ fn build_result(user: &User, secret: &str) -> Result<AuthResult, AuthError> {
     Ok(AuthResult { token, user_id: user.id.clone(), username: user.username.clone() })
 }
 
-// ── Public API ────────────────────────────────────────────────────────────────
+// ── Public ────────────────────────────────────────────────────────────────────
 
 pub async fn register(pool: &PgPool, username: &str, password: &str, secret: &str) -> Result<AuthResult, AuthError> {
     let existing = user_repo::find_by_username(pool, username)

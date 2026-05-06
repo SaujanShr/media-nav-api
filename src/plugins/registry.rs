@@ -41,6 +41,8 @@ pub struct PluginRegistry {
 }
 
 impl PluginRegistry {
+    // ── Public ────────────────────────────────────────────────────────────────
+
     pub fn load_from_dir(dir: &Path) -> Self {
         let mut libraries = Vec::new();
         let mut plugins: HashMap<String, Plugin> = HashMap::new();

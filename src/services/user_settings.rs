@@ -11,7 +11,7 @@ pub enum UserSettingsError {
     Internal,
 }
 
-// ── Public API ────────────────────────────────────────────────────────────────
+// ── Public ────────────────────────────────────────────────────────────────────
 
 pub async fn get(pool: &PgPool, user_id: &str) -> Result<UserSettings, UserSettingsError> {
     user_settings_repo::get(pool, user_id)

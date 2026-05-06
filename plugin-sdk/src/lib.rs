@@ -1,3 +1,7 @@
+mod category;
+
+pub use category::Category;
+
 use serde::Serialize;
 
 /// Descriptive information about a plugin, shown in catalogues and UIs.
@@ -5,7 +9,7 @@ use serde::Serialize;
 pub struct PluginMetadata {
     pub name:        &'static str,
     pub description: &'static str,
-    pub category:    &'static str,
+    pub category:    Category,
     pub nsfw:        bool,
 }
 

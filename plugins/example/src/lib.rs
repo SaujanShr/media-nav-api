@@ -1,4 +1,4 @@
-use plugin_sdk::{Plugin, PluginMetadata, PluginResources};
+use plugin_sdk::{Category, Plugin, PluginMetadata, PluginResources};
 
 const PLUGIN: Plugin = Plugin {
     id:      "example",
@@ -6,7 +6,7 @@ const PLUGIN: Plugin = Plugin {
     metadata: PluginMetadata {
         name:        "Example Plugin",
         description: "A minimal example plugin for media-nav.",
-        category:    "example",
+        category:    Category::Unknown,
         nsfw:        false,
     },
     resources: PluginResources {

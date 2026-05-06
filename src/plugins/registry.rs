@@ -70,15 +70,7 @@ impl PluginRegistry {
 
         PluginRegistry { _libraries: libraries, plugins }
     }
-
-    pub fn get(&self, id: &str) -> Option<&Plugin> {
-        self.plugins.get(id)
-    }
-
-    pub fn is_loaded(&self, id: &str) -> bool {
-        self.plugins.contains_key(id)
-    }
-
+    
     pub fn plugins(&self) -> impl Iterator<Item = &Plugin> {
         self.plugins.values()
     }

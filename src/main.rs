@@ -9,6 +9,7 @@ mod services;
 mod state;
 
 use std::path::Path;
+use dotenvy::dotenv;
 use actix_web::{App, HttpServer, Error};
 use actix_web::web::{Data, scope};
 use actix_web::dev::{ServiceFactory, ServiceRequest, ServiceResponse};
@@ -63,7 +64,7 @@ fn create_app(app_state: Data<AppState>) -> App<
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    dotenvy::dotenv().ok();
+    dotenv().ok();
 
     let config = Config::from_env();
     let pool = init_db(&config.database_url).await;

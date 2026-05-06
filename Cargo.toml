@@ -1,5 +1,5 @@
 [workspace]
-members = [".", "plugin-sdk", "plugins/example"]
+members = [".", "plugin-sdk", "plugins/example", "plugins/anime"]
 resolver = "2"
 
 [package]

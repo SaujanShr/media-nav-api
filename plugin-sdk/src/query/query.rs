@@ -1,8 +1,8 @@
 use std::collections::HashMap;
-use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 
 use crate::query::expression::{FilterExpression, SortExpression};
+use crate::query::partial_date::PartialDate;
 
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 pub struct Query {
@@ -13,7 +13,7 @@ pub struct Query {
     #[serde(default)]
     pub number_fields:  HashMap<String, (Option<f32>, Option<f32>)>,
     #[serde(default)]
-    pub date_fields:    HashMap<String, (Option<NaiveDate>, Option<NaiveDate>)>,
+    pub date_fields:    HashMap<String, (Option<PartialDate>, Option<PartialDate>)>,
     #[serde(default)]
     pub filter_fields:  HashMap<String, FilterExpression>,
     #[serde(default)]

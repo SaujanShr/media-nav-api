@@ -1,7 +1,9 @@
+mod client;
 mod enrich;
 mod fetch;
 mod plugin;
 mod schema;
+mod types;
 
 use plugin_sdk::plugin::Plugin;
 

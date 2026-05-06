@@ -18,10 +18,11 @@ build: build-plugins
 build-plugins:
 	$(CARGO) build --package example-plugin
 
-## Copy compiled plugin dylibs into the plugins directory
+## Copy compiled plugin dylibs into the plugins directory and sign them
 install-plugins: build-plugins
 	@mkdir -p $(PLUGINS_DIR)
 	cp $(EXAMPLE_LIB) $(PLUGINS_DIR)/
+	codesign -s - $(PLUGINS_DIR)/libexample_plugin.$(EXT)
 
 ## Remove build artefacts and installed plugins
 clean:

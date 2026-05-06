@@ -3,6 +3,8 @@ use actix_web::web::{Data, Json, Path, Query, ServiceConfig};
 use serde::Deserialize;
 use serde_json::json;
 
+use plugin_sdk::query::Query as PluginQuery;
+
 use crate::auth::user_id;
 use crate::services::plugin::{self as plugin_service, PluginError};
 use crate::state::AppState;
@@ -24,6 +26,12 @@ struct FetchQuery {
     page:      u32,
     #[serde(rename = "pageSize")]
     page_size: u32,
+}
+
+#[derive(Deserialize)]
+struct FetchBody {
+    #[serde(default)]
+    query: PluginQuery,
 }
 
 // ── Private ───────────────────────────────────────────────────────────────────
@@ -97,21 +105,27 @@ async fn set_enabled(req: HttpRequest, state: Data<AppState>, path: Path<String>
     }
 }
 
-/// `GET /api/plugins/{plugin_id}/fetch?page={page}&pageSize={page_size}`
-#[get("/plugins/{plugin_id}/fetch")]
+/// `POST /api/plugins/{plugin_id}/fetch?page={page}&pageSize={page_size}`
+///
+/// Body (optional): `{ "query": { "search_fields": { "search": "foo" }, ... } }`
+#[post("/plugins/{plugin_id}/fetch")]
 async fn fetch(
     req: HttpRequest,
     state: Data<AppState>,
     path: Path<String>,
-    query: Query<FetchQuery>,
+    qs: Query<FetchQuery>,
+    body: Json<FetchBody>,
 ) -> impl Responder {
+    assert_ok!(user_id(&req));
     let plugin_id = path.into_inner();
-    let _user_id = assert_ok!(user_id(&req));
 
-    let page      = query.page;
-    let page_size = query.page_size;
-
-    match plugin_service::fetch(&state.plugins, &plugin_id, page, page_size) {
+    match plugin_service::fetch(
+        &state.plugins,
+        &plugin_id,
+        qs.page,
+        qs.page_size,
+        body.into_inner().query
+    ) {
         Ok(result) => HttpResponse::Ok().json(result),
         Err(e) => error_response(e),
     }
@@ -124,8 +138,8 @@ async fn enrich(
     state: Data<AppState>,
     path: Path<(String, String)>,
 ) -> impl Responder {
+    assert_ok!(user_id(&req));
     let (plugin_id, item_id) = path.into_inner();
-    let _user_id = assert_ok!(user_id(&req));
 
     match plugin_service::enrich(&state.plugins, &plugin_id, &item_id) {
         Ok(Some(detail)) => HttpResponse::Ok().json(detail),

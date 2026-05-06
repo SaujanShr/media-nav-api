@@ -1,6 +1,10 @@
+use std::collections::HashMap;
+
 use plugin_sdk::category::Category;
 use plugin_sdk::plugin::{FetchRequest, FetchResult, Plugin, PluginMetadata, PluginResources};
 use plugin_sdk::library_item::{LibraryItem, LibraryItemDetail, LibraryItemMetadata, LibraryItemResources};
+use plugin_sdk::query::schema::{QuerySchema, QueryFieldSchema, SearchFieldSchema, SortFieldSchema};
+use plugin_sdk::query::expression::{SortDirection, SortOption};
 
 // ── Plugin ────────────────────────────────────────────────────────────────────
 
@@ -17,9 +21,34 @@ const PLUGIN: Plugin = Plugin {
         icon_url:   "https://example.com/icon.png",
         banner_url: "https://example.com/banner.png",
     },
+    schema: mock_schema,
     fetch:  mock_fetch,
     enrich: mock_enrich,
 };
+
+// ── Private ───────────────────────────────────────────────────────────────────
+
+fn mock_schema() -> QuerySchema {
+    let mut fields = HashMap::new();
+
+    fields.insert("search", QueryFieldSchema::Search(SearchFieldSchema {
+        required:   false,
+        min_length: None,
+        max_length: None,
+        default:    None,
+    }));
+
+    fields.insert("sort", QueryFieldSchema::Sort(SortFieldSchema {
+        supported: vec![
+            SortOption { sort: "title".to_string(), ascending: true, descending: true },
+        ],
+        required:          false,
+        default_sort:      "title".to_string(),
+        default_direction: SortDirection::Asc,
+    }));
+
+    QuerySchema { fields }
+}
 
 fn mock_fetch(_req: FetchRequest) -> FetchResult {
     FetchResult {

@@ -3,6 +3,7 @@ use uuid::Uuid;
 
 use plugin_sdk::library_item::LibraryItemDetail;
 use plugin_sdk::plugin::{FetchRequest, FetchResult, Plugin};
+use plugin_sdk::query::Query;
 
 use crate::models::plugin::UserPlugin;
 use crate::plugins::{PluginRegistry};
@@ -44,14 +45,13 @@ pub fn fetch(
     plugin_id: &str,
     page: u32,
     page_size: u32,
+    query: Query,
 ) -> Result<FetchResult, PluginError> {
     let plugin = registry
         .get(plugin_id)
         .ok_or(PluginError::NotFound)?;
 
-    let result = (plugin.fetch)(
-        FetchRequest { page, page_size }
-    );
+    let result = (plugin.fetch)(FetchRequest { page, page_size, query });
 
     Ok(result)
 }

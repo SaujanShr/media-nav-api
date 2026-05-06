@@ -2,21 +2,20 @@ use serde::Serialize;
 
 use crate::category::Category;
 use crate::library_item::{LibraryItem, LibraryItemDetail};
+use crate::query::{Query, schema::QuerySchema};
 
-/// Parameters passed to a plugin's fetch function.
 pub struct FetchRequest {
     pub page:      u32,
     pub page_size: u32,
+    pub query:     Query,
 }
 
-/// The paginated result returned by a plugin's fetch function.
 #[derive(Serialize)]
 pub struct FetchResult {
     pub items: Vec<LibraryItem>,
     pub total: u64,
 }
 
-/// Descriptive information about a plugin, shown in catalogues and UIs.
 #[derive(Serialize, Clone, Copy)]
 pub struct PluginMetadata {
     pub name:        &'static str,
@@ -25,7 +24,6 @@ pub struct PluginMetadata {
     pub nsfw:        bool,
 }
 
-/// Static assets the plugin ships — loaded by the frontend at runtime.
 #[derive(Serialize, Clone, Copy)]
 pub struct PluginResources {
     pub icon_url:   &'static str,
@@ -56,8 +54,9 @@ pub struct Plugin {
     pub metadata:  PluginMetadata,
     pub resources: PluginResources,
     #[serde(skip)]
+    pub schema: fn() -> QuerySchema,
+    #[serde(skip)]
     pub fetch:  fn(FetchRequest) -> FetchResult,
     #[serde(skip)]
     pub enrich: fn(&str) -> Option<LibraryItemDetail>,
 }
-

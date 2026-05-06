@@ -5,8 +5,7 @@ use std::io;
 use std::fs;
 
 use libloading::{Library, Symbol};
-
-use plugin_sdk::Plugin;
+use plugin_sdk::plugin::Plugin;
 
 type CreatePluginFn = unsafe extern "C" fn() -> *mut Plugin;
 

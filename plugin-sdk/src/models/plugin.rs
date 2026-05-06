@@ -1,7 +1,7 @@
 use serde::Serialize;
 
-use crate::Category;
-use crate::{LibraryItem, LibraryItemDetail};
+use crate::category::Category;
+use crate::library_item::{LibraryItem, LibraryItemDetail};
 
 /// Parameters passed to a plugin's fetch function.
 pub struct FetchRequest {

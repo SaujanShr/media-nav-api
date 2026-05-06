@@ -113,7 +113,24 @@ async fn fetch(
 
     match plugin_service::fetch(&state.plugins, &plugin_id, page, page_size) {
         Ok(result) => HttpResponse::Ok().json(result),
-        Err(e)     => error_response(e),
+        Err(e) => error_response(e),
+    }
+}
+
+/// `GET /api/plugins/{plugin_id}/enrich/{item_id}`
+#[get("/plugins/{plugin_id}/enrich/{item_id}")]
+async fn enrich(
+    req: HttpRequest,
+    state: Data<AppState>,
+    path: Path<(String, String)>,
+) -> impl Responder {
+    let (plugin_id, item_id) = path.into_inner();
+    let _user_id = assert_ok!(user_id(&req));
+
+    match plugin_service::enrich(&state.plugins, &plugin_id, &item_id) {
+        Ok(Some(detail)) => HttpResponse::Ok().json(detail),
+        Ok(None) => HttpResponse::NotFound().json(json!({ "error": "item not found" })),
+        Err(e) => error_response(e),
     }
 }
 
@@ -129,5 +146,6 @@ pub fn protected_routes(cfg: &mut ServiceConfig) {
         .service(install)
         .service(uninstall)
         .service(set_enabled)
-        .service(fetch);
+        .service(fetch)
+        .service(enrich);
 }

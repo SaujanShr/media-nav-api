@@ -1,7 +1,5 @@
-mod category;
-mod library_item;
-mod plugin;
+mod models;
 
-pub use category::Category;
-pub use library_item::{LibraryItem, LibraryItemDetail, LibraryItemMetadata, LibraryItemResources};
-pub use plugin::{FetchRequest, FetchResult, Plugin, PluginMetadata, PluginResources};
+pub use models::category;
+pub use models::library_item;
+pub use models::plugin;

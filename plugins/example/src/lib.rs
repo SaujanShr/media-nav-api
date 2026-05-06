@@ -1,8 +1,6 @@
-use plugin_sdk::{
-    Category, FetchRequest, FetchResult,
-    LibraryItem, LibraryItemDetail, LibraryItemMetadata, LibraryItemResources,
-    Plugin, PluginMetadata, PluginResources,
-};
+use plugin_sdk::category::Category;
+use plugin_sdk::plugin::{FetchRequest, FetchResult, Plugin, PluginMetadata, PluginResources};
+use plugin_sdk::library_item::{LibraryItem, LibraryItemDetail, LibraryItemMetadata, LibraryItemResources};
 
 // ── Plugin ────────────────────────────────────────────────────────────────────
 
@@ -19,11 +17,11 @@ const PLUGIN: Plugin = Plugin {
         icon_url:   "https://example.com/icon.png",
         banner_url: "https://example.com/banner.png",
     },
-    fetch:  fetch,
-    enrich: enrich,
+    fetch:  mock_fetch,
+    enrich: mock_enrich,
 };
 
-fn fetch(_req: FetchRequest) -> FetchResult {
+fn mock_fetch(_req: FetchRequest) -> FetchResult {
     FetchResult {
         items: vec![
             LibraryItem {
@@ -36,7 +34,7 @@ fn fetch(_req: FetchRequest) -> FetchResult {
     }
 }
 
-fn enrich(id: &str) -> Option<LibraryItemDetail> {
+fn mock_enrich(id: &str) -> Option<LibraryItemDetail> {
     match id {
         "example-item-1" => Some(LibraryItemDetail {
             id: id.to_string(),

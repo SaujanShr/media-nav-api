@@ -1,7 +1,7 @@
 use serde::Serialize;
 
 use crate::Category;
-use crate::LibraryItem;
+use crate::{LibraryItem, LibraryItemDetail};
 
 /// Parameters passed to a plugin's fetch function.
 pub struct FetchRequest {
@@ -56,6 +56,8 @@ pub struct Plugin {
     pub metadata:  PluginMetadata,
     pub resources: PluginResources,
     #[serde(skip)]
-    pub fetch: fn(FetchRequest) -> FetchResult,
+    pub fetch:  fn(FetchRequest) -> FetchResult,
+    #[serde(skip)]
+    pub enrich: fn(&str) -> Option<LibraryItemDetail>,
 }
 

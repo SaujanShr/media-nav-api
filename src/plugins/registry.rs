@@ -70,7 +70,11 @@ impl PluginRegistry {
 
         PluginRegistry { _libraries: libraries, plugins }
     }
-    
+
+    pub fn get(&self, id: &str) -> Option<&Plugin> {
+        self.plugins.get(id)
+    }
+
     pub fn plugins(&self) -> impl Iterator<Item = &Plugin> {
         self.plugins.values()
     }

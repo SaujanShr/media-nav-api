@@ -1,4 +1,8 @@
-use plugin_sdk::{Category, Plugin, PluginMetadata, PluginResources};
+use plugin_sdk::{
+    Category, FetchRequest, FetchResult,
+    LibraryItem, LibraryItemMetadata, LibraryItemResources,
+    Plugin, PluginMetadata, PluginResources
+};
 
 const PLUGIN: Plugin = Plugin {
     id:      "example",
@@ -13,7 +17,21 @@ const PLUGIN: Plugin = Plugin {
         icon_url:   "https://example.com/icon.png",
         banner_url: "https://example.com/banner.png",
     },
+    fetch,
 };
+
+fn fetch(_req: FetchRequest) -> FetchResult {
+    FetchResult {
+        items: vec![
+            LibraryItem {
+                id: "example-item-1".to_string(),
+                metadata:  LibraryItemMetadata  { title:         "Example Item".to_string() },
+                resources: LibraryItemResources { thumbnail_url: "https://example.com/thumb.png".to_string() },
+            },
+        ],
+        total: 1,
+    }
+}
 
 // ── Entry-point ───────────────────────────────────────────────────────────────
 

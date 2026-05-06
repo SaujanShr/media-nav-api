@@ -1,5 +1,5 @@
 use actix_web::{delete, get, patch, post, HttpRequest, HttpResponse, Responder};
-use actix_web::web::{Data, Json, Path, ServiceConfig};
+use actix_web::web::{Data, Json, Path, Query, ServiceConfig};
 use serde::Deserialize;
 use serde_json::json;
 
@@ -17,6 +17,13 @@ struct InstallRequest {
 #[derive(Deserialize)]
 struct SetEnabledRequest {
     enabled: bool,
+}
+
+#[derive(Deserialize)]
+struct FetchQuery {
+    page:      u32,
+    #[serde(rename = "pageSize")]
+    page_size: u32,
 }
 
 // ── Private ───────────────────────────────────────────────────────────────────
@@ -90,6 +97,26 @@ async fn set_enabled(req: HttpRequest, state: Data<AppState>, path: Path<String>
     }
 }
 
+/// `GET /api/plugins/{plugin_id}/fetch?page={page}&pageSize={page_size}`
+#[get("/plugins/{plugin_id}/fetch")]
+async fn fetch(
+    req: HttpRequest,
+    state: Data<AppState>,
+    path: Path<String>,
+    query: Query<FetchQuery>,
+) -> impl Responder {
+    let plugin_id = path.into_inner();
+    let _user_id = assert_ok!(user_id(&req));
+
+    let page      = query.page;
+    let page_size = query.page_size;
+
+    match plugin_service::fetch(&state.plugins, &plugin_id, page, page_size) {
+        Ok(result) => HttpResponse::Ok().json(result),
+        Err(e)     => error_response(e),
+    }
+}
+
 // ── Public ────────────────────────────────────────────────────────────────────
 
 pub fn public_routes(cfg: &mut ServiceConfig) {
@@ -101,5 +128,6 @@ pub fn protected_routes(cfg: &mut ServiceConfig) {
         .service(list)
         .service(install)
         .service(uninstall)
-        .service(set_enabled);
+        .service(set_enabled)
+        .service(fetch);
 }

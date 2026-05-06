@@ -20,6 +20,23 @@ pub fn list_all(registry: &PluginRegistry) -> Vec<&Plugin> {
     registry.plugins().collect()
 }
 
+pub fn fetch(
+    registry: &PluginRegistry,
+    plugin_id: &str,
+    page: u32,
+    page_size: u32,
+) -> Result<plugin_sdk::FetchResult, PluginError> {
+    let plugin = registry
+        .get(plugin_id)
+        .ok_or(PluginError::NotFound)?;
+
+    let result = (plugin.fetch)(
+        plugin_sdk::FetchRequest { page, page_size }
+    );
+
+    Ok(result)
+}
+
 pub async fn list(pool: &PgPool, user_id: &str) -> Result<Vec<UserPlugin>, PluginError> {
     plugin_repo::list(pool, user_id)
         .await

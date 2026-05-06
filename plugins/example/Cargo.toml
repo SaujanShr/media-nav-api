@@ -8,4 +8,3 @@ crate-type = ["cdylib"]
 
 [dependencies]
 plugin-sdk = { path = "../../plugin-sdk" }
-

@@ -1,5 +1,5 @@
 use actix_web::{get, put, HttpRequest, HttpResponse, Responder};
-use actix_web::web::{Data, Json, ServiceConfig};
+use actix_web::web::{Data, Json, ServiceConfig, scope};
 use serde::Deserialize;
 use serde_json::json;
 
@@ -28,7 +28,7 @@ fn error_response(err: UserSettingsError) -> HttpResponse {
 // ── Handlers ──────────────────────────────────────────────────────────────────
 
 /// `GET /api/settings`
-#[get("/settings")]
+#[get("")]
 async fn get_settings(state: Data<AppState>, req: HttpRequest) -> impl Responder {
     let claims = assert_ok!(extractor::claims(&req));
 
@@ -41,7 +41,7 @@ async fn get_settings(state: Data<AppState>, req: HttpRequest) -> impl Responder
 /// `PUT /api/settings/nsfw`
 ///
 /// Body: `{ "enabled": true }`
-#[put("/settings/nsfw")]
+#[put("/nsfw")]
 async fn set_nsfw(state: Data<AppState>, req: HttpRequest, body: Json<SetNsfwRequest>) -> impl Responder {
     let claims = assert_ok!(extractor::claims(&req));
 
@@ -54,7 +54,9 @@ async fn set_nsfw(state: Data<AppState>, req: HttpRequest, body: Json<SetNsfwReq
 // ── Public ────────────────────────────────────────────────────────────────────
 
 pub fn protected_routes(cfg: &mut ServiceConfig) {
-    cfg
-        .service(get_settings)
-        .service(set_nsfw);
+    cfg.service(
+        scope("/settings")
+            .service(get_settings)
+            .service(set_nsfw),
+    );
 }

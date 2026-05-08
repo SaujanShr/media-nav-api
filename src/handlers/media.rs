@@ -1,11 +1,11 @@
-use actix_web::{get, post, HttpRequest, HttpResponse, Responder};
-use actix_web::web::{Data, Json, Path, Query, ServiceConfig};
+use actix_web::{get, post, HttpResponse, Responder};
+use actix_web::web::{Data, Json, Path, Query, ServiceConfig, scope};
+use actix_governor::{Governor, GovernorConfigBuilder};
 use serde::Deserialize;
 use serde_json::json;
 
 use plugin_sdk::query::Query as PluginQuery;
 
-use crate::auth::user_id;
 use crate::services::plugin::{self as plugin_service, PluginError};
 use crate::state::AppState;
 
@@ -37,18 +37,16 @@ fn error_response(err: PluginError) -> HttpResponse {
 
 // ── Handlers ──────────────────────────────────────────────────────────────────
 
-/// `POST /api/media/{plugin_id}/fetch?page={page}&pageSize={page_size}`
+/// `POST /media/{plugin_id}/fetch?page={page}&pageSize={page_size}`
 ///
 /// Body (optional): `{ "query": { "search_fields": { "search": "foo" }, ... } }`
-#[post("/media/{plugin_id}/fetch")]
+#[post("/{plugin_id}/fetch")]
 async fn fetch(
-    req: HttpRequest,
     state: Data<AppState>,
     path: Path<String>,
     qs: Query<FetchQuery>,
     body: Json<FetchBody>,
 ) -> impl Responder {
-    assert_ok!(user_id(&req));
     let plugin_id = path.into_inner();
 
     match plugin_service::fetch(
@@ -64,13 +62,11 @@ async fn fetch(
 }
 
 /// `GET /api/media/{plugin_id}/enrich/{item_id}`
-#[get("/media/{plugin_id}/enrich/{item_id}")]
+#[get("/{plugin_id}/enrich/{item_id}")]
 async fn enrich(
-    req: HttpRequest,
     state: Data<AppState>,
     path: Path<(String, String)>,
 ) -> impl Responder {
-    assert_ok!(user_id(&req));
     let (plugin_id, item_id) = path.into_inner();
 
     match plugin_service::enrich(&state.plugins, &plugin_id, &item_id) {
@@ -82,9 +78,17 @@ async fn enrich(
 
 // ── Public ────────────────────────────────────────────────────────────────────
 
-pub fn protected_routes(cfg: &mut ServiceConfig) {
-    cfg
-        .service(fetch)
-        .service(enrich);
+pub fn public_routes(cfg: &mut ServiceConfig) {
+    let governor_conf = GovernorConfigBuilder::default()
+        .requests_per_minute(60)
+        .finish()
+        .unwrap();
+
+    cfg.service(
+        scope("/media")
+            .wrap(Governor::new(&governor_conf))
+            .service(fetch)
+            .service(enrich),
+    );
 }
 

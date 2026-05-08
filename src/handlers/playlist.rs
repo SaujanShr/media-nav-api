@@ -1,5 +1,5 @@
 use actix_web::{delete, get, patch, post, HttpRequest, HttpResponse, Responder};
-use actix_web::web::{Data, Json, Path, ServiceConfig};
+use actix_web::web::{Data, Json, Path, ServiceConfig, scope};
 use serde::Deserialize;
 use serde_json::json;
 
@@ -49,7 +49,7 @@ fn error_response(err: PlaylistError) -> HttpResponse {
 // ── Handlers ──────────────────────────────────────────────────────────────────
 
 /// `GET /api/playlists`
-#[get("/playlists")]
+#[get("")]
 async fn list(req: HttpRequest, state: Data<AppState>) -> impl Responder {
     let user_id = assert_ok!(user_id(&req));
 
@@ -62,7 +62,7 @@ async fn list(req: HttpRequest, state: Data<AppState>) -> impl Responder {
 /// `POST /api/playlists`
 ///
 /// Body: `{ "name": "My Playlist" }`
-#[post("/playlists")]
+#[post("")]
 async fn create(req: HttpRequest, state: Data<AppState>, body: Json<CreateRequest>) -> impl Responder {
     let user_id = assert_ok!(user_id(&req));
 
@@ -73,7 +73,7 @@ async fn create(req: HttpRequest, state: Data<AppState>, body: Json<CreateReques
 }
 
 /// `DELETE /api/playlists/{playlist_id}`
-#[delete("/playlists/{playlist_id}")]
+#[delete("/{playlist_id}")]
 async fn delete(req: HttpRequest, state: Data<AppState>, path: Path<String>) -> impl Responder {
     let playlist_id = path.into_inner();
     let user_id = assert_ok!(user_id(&req));
@@ -87,7 +87,7 @@ async fn delete(req: HttpRequest, state: Data<AppState>, path: Path<String>) -> 
 /// `PATCH /api/playlists/{playlist_id}`
 ///
 /// Body: `{ "name": "New Name" }`
-#[patch("/playlists/{playlist_id}")]
+#[patch("/{playlist_id}")]
 async fn rename(req: HttpRequest, state: Data<AppState>, path: Path<String>, body: Json<RenameRequest>) -> impl Responder {
     let playlist_id = path.into_inner();
     let user_id = assert_ok!(user_id(&req));
@@ -99,7 +99,7 @@ async fn rename(req: HttpRequest, state: Data<AppState>, path: Path<String>, bod
 }
 
 /// `GET /api/playlists/{playlist_id}/items`
-#[get("/playlists/{playlist_id}/items")]
+#[get("/{playlist_id}/items")]
 async fn list_items(req: HttpRequest, state: Data<AppState>, path: Path<String>) -> impl Responder {
     let playlist_id = path.into_inner();
     let user_id = assert_ok!(user_id(&req));
@@ -113,7 +113,7 @@ async fn list_items(req: HttpRequest, state: Data<AppState>, path: Path<String>)
 /// `POST /api/playlists/{playlist_id}/items`
 ///
 /// Body: `{ "user_library_item_id": "abc" }`
-#[post("/playlists/{playlist_id}/items")]
+#[post("/{playlist_id}/items")]
 async fn add_item(
     req: HttpRequest,
     state: Data<AppState>,
@@ -130,7 +130,7 @@ async fn add_item(
 }
 
 /// `DELETE /api/playlists/{playlist_id}/items/{user_library_item_id}`
-#[delete("/playlists/{playlist_id}/items/{user_library_item_id}")]
+#[delete("/{playlist_id}/items/{user_library_item_id}")]
 async fn remove_item(
     req: HttpRequest,
     state: Data<AppState>,
@@ -148,7 +148,7 @@ async fn remove_item(
 /// `PATCH /api/playlists/{playlist_id}/items/{item_id}`
 ///
 /// Body: `{ "index": 2 }`
-#[patch("/playlists/{playlist_id}/items/{item_id}")]
+#[patch("/{playlist_id}/items/{item_id}")]
 async fn move_item(
     req: HttpRequest,
     state: Data<AppState>,
@@ -173,19 +173,15 @@ async fn move_item(
 // ── Public ────────────────────────────────────────────────────────────────────
 
 pub fn protected_routes(cfg: &mut ServiceConfig) {
-    cfg
-        .service(list)
-        .service(create)
-        .service(delete)
-        .service(rename)
-        .service(list_items)
-        .service(add_item)
-        .service(remove_item)
-        .service(move_item);
+    cfg.service(
+        scope("/playlists")
+            .service(list)
+            .service(create)
+            .service(delete)
+            .service(rename)
+            .service(list_items)
+            .service(add_item)
+            .service(remove_item)
+            .service(move_item),
+    );
 }
-
-
-
-
-
-

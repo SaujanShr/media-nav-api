@@ -50,13 +50,13 @@ fn create_app(app_state: Data<AppState>) -> App<
         .configure(handlers::health::public_routes)
         .configure(handlers::auth::public_routes)
         .configure(handlers::plugin::public_routes)
+        .configure(handlers::media::public_routes)
         // ── Protected routes (token required) ─────────────────────────
         .service(
             scope("/api")
                 .wrap(auth)
                 .configure(handlers::auth::protected_routes)
                 .configure(handlers::plugin::protected_routes)
-                .configure(handlers::media::protected_routes)
                 .configure(handlers::library::protected_routes)
                 .configure(handlers::playlist::protected_routes)
                 .configure(handlers::settings::protected_routes)

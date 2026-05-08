@@ -1,5 +1,5 @@
 use actix_web::{delete, get, patch, post, HttpRequest, HttpResponse, Responder};
-use actix_web::web::{Data, Json, Path, ServiceConfig};
+use actix_web::web::{Data, Json, Path, ServiceConfig, scope};
 use serde::Deserialize;
 use serde_json::json;
 
@@ -35,13 +35,13 @@ fn error_response(err: PluginError) -> HttpResponse {
 // ── Handlers ──────────────────────────────────────────────────────────────────
 
 /// `GET /plugins/all`
-#[get("/plugins/all")]
+#[get("/all")]
 async fn list_all(state: Data<AppState>) -> impl Responder {
     HttpResponse::Ok().json(plugin_service::list_all(&state.plugins))
 }
 
 /// `GET /api/plugins`
-#[get("/plugins")]
+#[get("")]
 async fn list(req: HttpRequest, state: Data<AppState>) -> impl Responder {
     let user_id = assert_ok!(user_id(&req));
 
@@ -54,7 +54,7 @@ async fn list(req: HttpRequest, state: Data<AppState>) -> impl Responder {
 /// `POST /api/plugins`
 ///
 /// Body: `{ "plugin_id": "abc" }`
-#[post("/plugins")]
+#[post("")]
 async fn install(req: HttpRequest, state: Data<AppState>, body: Json<InstallRequest>) -> impl Responder {
     let user_id = assert_ok!(user_id(&req));
 
@@ -65,7 +65,7 @@ async fn install(req: HttpRequest, state: Data<AppState>, body: Json<InstallRequ
 }
 
 /// `DELETE /api/plugins/{plugin_id}`
-#[delete("/plugins/{plugin_id}")]
+#[delete("/{plugin_id}")]
 async fn uninstall(req: HttpRequest, state: Data<AppState>, path: Path<String>) -> impl Responder {
     let plugin_id = path.into_inner();
     let user_id = assert_ok!(user_id(&req));
@@ -79,7 +79,7 @@ async fn uninstall(req: HttpRequest, state: Data<AppState>, path: Path<String>) 
 /// `PATCH /api/plugins/{plugin_id}`
 ///
 /// Body: `{ "enabled": true }`
-#[patch("/plugins/{plugin_id}")]
+#[patch("/{plugin_id}")]
 async fn set_enabled(req: HttpRequest, state: Data<AppState>, path: Path<String>, body: Json<SetEnabledRequest>) -> impl Responder {
     let plugin_id = path.into_inner();
     let user_id = assert_ok!(user_id(&req));
@@ -93,13 +93,18 @@ async fn set_enabled(req: HttpRequest, state: Data<AppState>, path: Path<String>
 // ── Public ────────────────────────────────────────────────────────────────────
 
 pub fn public_routes(cfg: &mut ServiceConfig) {
-    cfg.service(list_all);
+    cfg.service(
+        scope("/plugins")
+            .service(list_all),
+    );
 }
 
 pub fn protected_routes(cfg: &mut ServiceConfig) {
-    cfg
-        .service(list)
-        .service(install)
-        .service(uninstall)
-        .service(set_enabled);
+    cfg.service(
+        scope("/plugins")
+            .service(list)
+            .service(install)
+            .service(uninstall)
+            .service(set_enabled),
+    );
 }

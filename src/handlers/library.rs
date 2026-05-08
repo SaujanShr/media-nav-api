@@ -1,5 +1,5 @@
 use actix_web::{delete, get, post, HttpRequest, HttpResponse, Responder};
-use actix_web::web::{Data, Json, Path, ServiceConfig};
+use actix_web::web::{Data, Json, Path, ServiceConfig, scope};
 use serde::Deserialize;
 use serde_json::json;
 
@@ -34,7 +34,7 @@ fn error_response(err: LibraryItemError) -> HttpResponse {
 // ── Handlers ──────────────────────────────────────────────────────────────────
 
 /// `GET /api/library/{user_plugin_id}/items`
-#[get("/library/{user_plugin_id}/items")]
+#[get("/{user_plugin_id}/items")]
 async fn list(req: HttpRequest, state: Data<AppState>, path: Path<String>) -> impl Responder {
     let user_plugin_id = path.into_inner();
     let user_id = assert_ok!(user_id(&req));
@@ -48,7 +48,7 @@ async fn list(req: HttpRequest, state: Data<AppState>, path: Path<String>) -> im
 /// `POST /api/library/{user_plugin_id}/items`
 ///
 /// Body: `{ "library_item_id": "abc" }`
-#[post("/library/{user_plugin_id}/items")]
+#[post("/{user_plugin_id}/items")]
 async fn add(req: HttpRequest, state: Data<AppState>, path: Path<String>, body: Json<AddRequest>) -> impl Responder {
     let user_plugin_id = path.into_inner();
     let user_id = assert_ok!(user_id(&req));
@@ -60,7 +60,7 @@ async fn add(req: HttpRequest, state: Data<AppState>, path: Path<String>, body: 
 }
 
 /// `DELETE /api/library/{user_plugin_id}/items/{library_item_id}`
-#[delete("/library/{user_plugin_id}/items/{library_item_id}")]
+#[delete("/{user_plugin_id}/items/{library_item_id}")]
 async fn remove(req: HttpRequest, state: Data<AppState>, path: Path<(String, String)>) -> impl Responder {
     let (user_plugin_id, library_item_id) = path.into_inner();
     let user_id = assert_ok!(user_id(&req));
@@ -74,8 +74,10 @@ async fn remove(req: HttpRequest, state: Data<AppState>, path: Path<(String, Str
 // ── Public ────────────────────────────────────────────────────────────────────
 
 pub fn protected_routes(cfg: &mut ServiceConfig) {
-    cfg
-        .service(list)
-        .service(add)
-        .service(remove);
+    cfg.service(
+        scope("/library")
+            .service(list)
+            .service(add)
+            .service(remove),
+    );
 }

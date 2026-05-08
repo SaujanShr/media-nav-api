@@ -2,7 +2,7 @@ use actix_web::{
     get, post, Responder,
     HttpRequest, HttpResponse
 };
-use actix_web::web::{Data, Json, ServiceConfig};
+use actix_web::web::{Data, Json, ServiceConfig, scope};
 use serde::Deserialize;
 use serde_json::json;
 
@@ -36,7 +36,7 @@ fn error_response(err: AuthError) -> HttpResponse {
 /// `POST /auth/register`
 ///
 /// Body: `{ "username": "alice", "password": "secret" }`
-#[post("/auth/register")]
+#[post("/register")]
 async fn register(state: Data<AppState>, body: Json<AuthRequest>) -> impl Responder {
     match auth_service::register(&state.db, &body.username, &body.password, &state.jwt_secret).await {
         Ok(result) => HttpResponse::Created().json(result),
@@ -47,7 +47,7 @@ async fn register(state: Data<AppState>, body: Json<AuthRequest>) -> impl Respon
 /// `POST /auth/login`
 ///
 /// Body: `{ "username": "alice", "password": "secret" }`
-#[post("/auth/login")]
+#[post("/login")]
 async fn login(state: Data<AppState>, body: Json<AuthRequest>) -> impl Responder {
     match auth_service::login(&state.db, &body.username, &body.password, &state.jwt_secret).await {
         Ok(result) => HttpResponse::Ok().json(result),
@@ -56,7 +56,7 @@ async fn login(state: Data<AppState>, body: Json<AuthRequest>) -> impl Responder
 }
 
 /// `GET /api/auth/me`
-#[get("/auth/me")]
+#[get("/me")]
 async fn me(req: HttpRequest) -> impl Responder {
     let claims = assert_ok!(extractor::claims(&req));
     HttpResponse::Ok().json(claims)
@@ -65,12 +65,16 @@ async fn me(req: HttpRequest) -> impl Responder {
 // ── Public ────────────────────────────────────────────────────────────────────
 
 pub fn public_routes(cfg: &mut ServiceConfig) {
-    cfg
-        .service(register)
-        .service(login);
+    cfg.service(
+        scope("/auth")
+            .service(register)
+            .service(login),
+    );
 }
 
 pub fn protected_routes(cfg: &mut ServiceConfig) {
-    cfg
-        .service(me);
+    cfg.service(
+        scope("/auth")
+            .service(me),
+    );
 }

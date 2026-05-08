@@ -16,14 +16,16 @@ fn build_url(req: &FetchRequest) -> String {
         req.page_size, req.page, params.order_by, params.sort_dir,
     );
 
-    if let Some(q) = &params.search { url.push_str(&format!("&q={q}")); }
-    if let Some(t) = &params.anime_type { url.push_str(&format!("&type={t}")); }
-    if let Some(s) = &params.status { url.push_str(&format!("&status={s}")); }
-    if let Some(r) = &params.rating { url.push_str(&format!("&rating={r}")); }
-    if let Some(mn) = params.score_min { url.push_str(&format!("&min_score={mn}")); }
-    if let Some(mx) = params.score_max { url.push_str(&format!("&max_score={mx}")); }
+    if let Some(q) =    &params.search { url.push_str(&format!("&q={q}")); }
+    if let Some(t) =    &params.anime_type { url.push_str(&format!("&type={t}")); }
+    if let Some(s) =    &params.status { url.push_str(&format!("&status={s}")); }
+    if let Some(r) =    &params.rating { url.push_str(&format!("&rating={r}")); }
+    if let Some(mn) =       params.score_min { url.push_str(&format!("&min_score={mn}")); }
+    if let Some(mx) =       params.score_max { url.push_str(&format!("&max_score={mx}")); }
     if let Some(sd) = params.start_year { url.push_str(&format!("&start_date={sd}")); }
-    if params.sfw { url.push_str("&sfw"); }
+    if params.sfw {
+        url.push_str("&sfw");
+    }
 
     url
 }

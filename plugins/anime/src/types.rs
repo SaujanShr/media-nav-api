@@ -1,5 +1,107 @@
 use serde::Deserialize;
 
+// ── Query Enums ───────────────────────────────────────────────────────────────
+
+pub enum AnimeType {
+    Tv, Movie, Ova, Special, Ona, Music, Cm, Pv, TvSpecial,
+}
+
+impl AnimeType {
+    pub fn all() -> &'static [Self] {
+        &[Self::Tv, Self::Movie, Self::Ova, Self::Special, Self::Ona,
+          Self::Music, Self::Cm, Self::Pv, Self::TvSpecial]
+    }
+}
+
+impl std::fmt::Display for AnimeType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(match self {
+            Self::Tv        => "tv",
+            Self::Movie     => "movie",
+            Self::Ova       => "ova",
+            Self::Special   => "special",
+            Self::Ona       => "ona",
+            Self::Music     => "music",
+            Self::Cm        => "cm",
+            Self::Pv        => "pv",
+            Self::TvSpecial => "tv_special",
+        })
+    }
+}
+
+pub enum AnimeStatus {
+    Airing, Complete, Upcoming,
+}
+
+impl AnimeStatus {
+    pub fn all() -> &'static [Self] {
+        &[Self::Airing, Self::Complete, Self::Upcoming]
+    }
+}
+
+impl std::fmt::Display for AnimeStatus {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(match self {
+            Self::Airing   => "airing",
+            Self::Complete => "complete",
+            Self::Upcoming => "upcoming",
+        })
+    }
+}
+
+pub enum AnimeRating {
+    G, Pg, Pg13, R17, R, Rx,
+}
+
+impl AnimeRating {
+    pub fn all() -> &'static [Self] {
+        &[Self::G, Self::Pg, Self::Pg13, Self::R17, Self::R, Self::Rx]
+    }
+}
+
+impl std::fmt::Display for AnimeRating {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(match self {
+            Self::G    => "g",
+            Self::Pg   => "pg",
+            Self::Pg13 => "pg13",
+            Self::R17  => "r17",
+            Self::R    => "r",
+            Self::Rx   => "rx",
+        })
+    }
+}
+
+pub enum AnimeOrderBy {
+    MalId, Title, StartDate, EndDate, Episodes,
+    Score, ScoredBy, Rank, Popularity, Members, Favorites,
+}
+
+impl AnimeOrderBy {
+    pub fn all() -> &'static [Self] {
+        &[Self::MalId, Self::Title, Self::StartDate, Self::EndDate, Self::Episodes,
+          Self::Score, Self::ScoredBy, Self::Rank, Self::Popularity, Self::Members, Self::Favorites]
+    }
+}
+
+impl std::fmt::Display for AnimeOrderBy {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(match self {
+            Self::MalId      => "mal_id",
+            Self::Title      => "title",
+            Self::StartDate  => "start_date",
+            Self::EndDate    => "end_date",
+            Self::Episodes   => "episodes",
+            Self::Score      => "score",
+            Self::ScoredBy   => "scored_by",
+            Self::Rank       => "rank",
+            Self::Popularity => "popularity",
+            Self::Members    => "members",
+            Self::Favorites  => "favorites",
+        })
+    }
+}
+
 // ── Images ────────────────────────────────────────────────────────────────────
 
 #[derive(Deserialize)]
@@ -157,106 +259,4 @@ pub struct JikanSearchResponse {
 #[derive(Deserialize)]
 pub struct JikanAnimeResponse {
     pub data: JikanAnime,
-}
-
-// ── Query Enums ───────────────────────────────────────────────────────────────
-
-pub enum AnimeType {
-    Tv, Movie, Ova, Special, Ona, Music, Cm, Pv, TvSpecial,
-}
-
-impl AnimeType {
-    pub fn all() -> &'static [Self] {
-        &[Self::Tv, Self::Movie, Self::Ova, Self::Special, Self::Ona,
-          Self::Music, Self::Cm, Self::Pv, Self::TvSpecial]
-    }
-}
-
-impl std::fmt::Display for AnimeType {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str(match self {
-            Self::Tv        => "tv",
-            Self::Movie     => "movie",
-            Self::Ova       => "ova",
-            Self::Special   => "special",
-            Self::Ona       => "ona",
-            Self::Music     => "music",
-            Self::Cm        => "cm",
-            Self::Pv        => "pv",
-            Self::TvSpecial => "tv_special",
-        })
-    }
-}
-
-pub enum AnimeStatus {
-    Airing, Complete, Upcoming,
-}
-
-impl AnimeStatus {
-    pub fn all() -> &'static [Self] {
-        &[Self::Airing, Self::Complete, Self::Upcoming]
-    }
-}
-
-impl std::fmt::Display for AnimeStatus {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str(match self {
-            Self::Airing   => "airing",
-            Self::Complete => "complete",
-            Self::Upcoming => "upcoming",
-        })
-    }
-}
-
-pub enum AnimeRating {
-    G, Pg, Pg13, R17, R, Rx,
-}
-
-impl AnimeRating {
-    pub fn all() -> &'static [Self] {
-        &[Self::G, Self::Pg, Self::Pg13, Self::R17, Self::R, Self::Rx]
-    }
-}
-
-impl std::fmt::Display for AnimeRating {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str(match self {
-            Self::G    => "g",
-            Self::Pg   => "pg",
-            Self::Pg13 => "pg13",
-            Self::R17  => "r17",
-            Self::R    => "r",
-            Self::Rx   => "rx",
-        })
-    }
-}
-
-pub enum AnimeOrderBy {
-    MalId, Title, StartDate, EndDate, Episodes,
-    Score, ScoredBy, Rank, Popularity, Members, Favorites,
-}
-
-impl AnimeOrderBy {
-    pub fn all() -> &'static [Self] {
-        &[Self::MalId, Self::Title, Self::StartDate, Self::EndDate, Self::Episodes,
-          Self::Score, Self::ScoredBy, Self::Rank, Self::Popularity, Self::Members, Self::Favorites]
-    }
-}
-
-impl std::fmt::Display for AnimeOrderBy {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str(match self {
-            Self::MalId      => "mal_id",
-            Self::Title      => "title",
-            Self::StartDate  => "start_date",
-            Self::EndDate    => "end_date",
-            Self::Episodes   => "episodes",
-            Self::Score      => "score",
-            Self::ScoredBy   => "scored_by",
-            Self::Rank       => "rank",
-            Self::Popularity => "popularity",
-            Self::Members    => "members",
-            Self::Favorites  => "favorites",
-        })
-    }
 }

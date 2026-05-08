@@ -1,11 +1,3 @@
-mod models;
-pub mod query;
-
-pub use models::category;
-pub use models::library_item;
-pub use models::media;
-pub use models::plugin;
-
 #[macro_export]
 macro_rules! push_attr {
     ($attrs:expr, $label:expr, $opt:expr) => {
@@ -17,3 +9,12 @@ macro_rules! push_attr {
         }
     };
 }
+
+mod models;
+pub mod query;
+pub mod utils;
+
+pub use models::category;
+pub use models::library_item;
+pub use models::media_item;
+pub use models::plugin;

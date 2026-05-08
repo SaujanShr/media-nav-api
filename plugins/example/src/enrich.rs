@@ -1,5 +1,5 @@
 use plugin_sdk::library_item::{LibraryItemDetail, LibraryItemMetadata, LibraryItemResources};
-use plugin_sdk::media::{MediaItem, MediaType};
+use plugin_sdk::media_item::{MediaItem, MediaType};
 
 pub fn enrich(id: &str) -> Option<LibraryItemDetail> {
     match id {
@@ -14,6 +14,7 @@ pub fn enrich(id: &str) -> Option<LibraryItemDetail> {
             resources: LibraryItemResources {
                 thumbnail: MediaItem {
                     media_type: MediaType::Image,
+                    title:      String::new(),
                     url:        "https://example.com/thumb.png".to_string(),
                 },
                 preview_items: vec![],

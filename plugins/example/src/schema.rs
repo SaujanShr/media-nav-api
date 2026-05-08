@@ -14,7 +14,11 @@ pub fn schema() -> QuerySchema {
 
     fields.insert("sort", QueryFieldSchema::Sort(SortFieldSchema {
         supported: vec![
-            SortOption { sort: "title".to_string(), ascending: true, descending: true },
+            SortOption {
+                sort: "title".to_string(),
+                ascending: true,
+                descending: true
+            },
         ],
         required:          false,
         default_sort:      "title".to_string(),

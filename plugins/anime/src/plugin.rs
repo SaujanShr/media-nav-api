@@ -17,6 +17,6 @@ pub const PLUGIN: Plugin = Plugin {
         banner_url: "https://image.myanimelist.net/ui/OK6W_koKDTOqqqLDbIoPAq4SZ1amR6RJ6R1z-GcZwEo",
     },
     schema: schema::schema,
-    fetch: fetch::fetch,
+    fetch:  fetch::fetch,
     enrich: enrich::enrich,
 };

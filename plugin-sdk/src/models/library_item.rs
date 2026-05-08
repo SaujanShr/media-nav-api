@@ -1,5 +1,5 @@
 use serde::Serialize;
-use crate::media::MediaItem;
+use crate::media_item::{MediaItem};
 
 #[derive(Serialize, Clone)]
 pub struct LibraryItemAttribute {
@@ -9,16 +9,16 @@ pub struct LibraryItemAttribute {
 
 #[derive(Serialize, Clone)]
 pub struct LibraryItemMetadata {
-    pub title: String,
-    pub subtitle: Option<String>,
-    pub summary: Option<String>,
+    pub title:      String,
+    pub subtitle:   Option<String>,
+    pub summary:    Option<String>,
     pub attributes: Vec<LibraryItemAttribute>,
 }
 
 #[derive(Serialize, Clone)]
 pub struct LibraryItemResources {
-    pub thumbnail: MediaItem,
-    pub preview_items: Vec<MediaItem>,
+    pub thumbnail:      MediaItem,
+    pub preview_items:  Vec<MediaItem>,
 }
 
 #[derive(Serialize, Clone)]

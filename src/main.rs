@@ -57,7 +57,7 @@ fn create_app(app_state: Data<AppState>) -> App<
                 .configure(handlers::auth::protected_routes)
                 .configure(handlers::plugin::protected_routes)
                 .configure(handlers::media::protected_routes)
-                .configure(handlers::library_item::protected_routes)
+                .configure(handlers::library::protected_routes)
                 .configure(handlers::playlist::protected_routes)
                 .configure(handlers::settings::protected_routes)
         )

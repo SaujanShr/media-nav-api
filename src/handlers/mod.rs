@@ -9,7 +9,7 @@ macro_rules! assert_ok {
 
 pub mod auth;
 pub mod health;
-pub mod library_item;
+pub mod library;
 pub mod media;
 pub mod playlist;
 pub mod plugin;

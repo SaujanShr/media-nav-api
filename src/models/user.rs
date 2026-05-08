@@ -1,4 +1,5 @@
 use sqlx::FromRow;
+use serde::Serialize;
 use chrono::{DateTime, Utc};
 
 #[derive(Clone, FromRow)]
@@ -9,3 +10,10 @@ pub struct User {
     #[allow(dead_code)]
     pub created_at: DateTime<Utc>,
 }
+
+#[derive(Clone, FromRow, Serialize)]
+pub struct UserSettings {
+    pub user_id: String,
+    pub nsfw_enabled: bool,
+}
+

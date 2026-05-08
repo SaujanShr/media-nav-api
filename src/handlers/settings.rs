@@ -4,7 +4,7 @@ use serde::Deserialize;
 use serde_json::json;
 
 use crate::auth::extractor;
-use crate::services::user_settings::{self as user_settings_service, UserSettingsError};
+use crate::services::user::{self as user_settings_service, UserSettingsError};
 use crate::state::AppState;
 
 // ── Types ─────────────────────────────────────────────────────────────────────

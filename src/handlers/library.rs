@@ -33,8 +33,8 @@ fn error_response(err: LibraryItemError) -> HttpResponse {
 
 // ── Handlers ──────────────────────────────────────────────────────────────────
 
-/// `GET /api/plugins/{user_plugin_id}/items`
-#[get("/plugins/{user_plugin_id}/items")]
+/// `GET /api/library/{user_plugin_id}/items`
+#[get("/library/{user_plugin_id}/items")]
 async fn list(req: HttpRequest, state: Data<AppState>, path: Path<String>) -> impl Responder {
     let user_plugin_id = path.into_inner();
     let user_id = assert_ok!(user_id(&req));
@@ -45,10 +45,10 @@ async fn list(req: HttpRequest, state: Data<AppState>, path: Path<String>) -> im
     }
 }
 
-/// `POST /api/plugins/{user_plugin_id}/items`
+/// `POST /api/library/{user_plugin_id}/items`
 ///
 /// Body: `{ "library_item_id": "abc" }`
-#[post("/plugins/{user_plugin_id}/items")]
+#[post("/library/{user_plugin_id}/items")]
 async fn add(req: HttpRequest, state: Data<AppState>, path: Path<String>, body: Json<AddRequest>) -> impl Responder {
     let user_plugin_id = path.into_inner();
     let user_id = assert_ok!(user_id(&req));
@@ -59,8 +59,8 @@ async fn add(req: HttpRequest, state: Data<AppState>, path: Path<String>, body: 
     }
 }
 
-/// `DELETE /api/plugins/{user_plugin_id}/items/{library_item_id}`
-#[delete("/plugins/{user_plugin_id}/items/{library_item_id}")]
+/// `DELETE /api/library/{user_plugin_id}/items/{library_item_id}`
+#[delete("/library/{user_plugin_id}/items/{library_item_id}")]
 async fn remove(req: HttpRequest, state: Data<AppState>, path: Path<(String, String)>) -> impl Responder {
     let (user_plugin_id, library_item_id) = path.into_inner();
     let user_id = assert_ok!(user_id(&req));

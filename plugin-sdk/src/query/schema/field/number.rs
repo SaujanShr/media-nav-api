@@ -1,4 +1,3 @@
-use crate::query::partial_date::PartialDate;
 
 /// Numeric range field. Bounds are `[from, to]`; either may be `None`.
 pub struct NumberFieldSchema {
@@ -21,7 +20,7 @@ impl NumberFieldSchema {
         for n in [from, to].into_iter().flatten() {
             self.validate_number(n)?;
         }
-        
+
         Ok(())
     }
 

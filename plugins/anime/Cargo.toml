@@ -7,7 +7,8 @@ edition = "2024"
 crate-type = ["cdylib"]
 
 [dependencies]
-plugin-sdk = { path = "../../plugin-sdk" }
-reqwest    = { version = "0.13", features = ["blocking", "json"] }
-serde      = { version = "1.0", features = ["derive"] }
+plugin-sdk   = { path = "../../plugin-sdk" }
+reqwest      = { version = "0.13", features = ["blocking", "json"] }
+serde        = { version = "1.0", features = ["derive"] }
+urlencoding  = "2"
 

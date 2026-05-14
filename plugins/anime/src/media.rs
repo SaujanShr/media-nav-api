@@ -1,39 +1,60 @@
 use plugin_sdk::media_item::{Media, MediaItem, MediaType};
-use plugin_sdk::utils::filename_from_url;
 
-use crate::client::{client, BASE_URL};
-use crate::types::JikanAnimeResponse;
+use crate::client::{client, JIKAN_BASE_URL, CONSUMET_BASE_URL};
+use crate::types::{ConsumetEpisodesResponse, ConsumetSourcesResponse, JikanAnimeResponse};
 
 // ── Private ───────────────────────────────────────────────────────────────────
 
-fn fetch_trailer_url(id: &str) -> Option<String> {
-    let client = client();
-    client
-        .get(format!("{BASE_URL}/anime/{id}"))
+fn fetch_title(mal_id: &str) -> Option<String> {
+    client()
+        .get(format!("{JIKAN_BASE_URL}/anime/{mal_id}"))
         .send()
         .and_then(|r| r.json::<JikanAnimeResponse>())
         .ok()
-        .and_then(|r| {
-            r.data.trailer.embed_url
-                .or(r.data.trailer.url)
-        })
+        .map(|r| r.data.title_english.unwrap_or(r.data.title))
+}
+
+fn fetch_episodes(mal_id: &str) -> Option<ConsumetEpisodesResponse> {
+    client()
+        .get(format!("{CONSUMET_BASE_URL}/anime/{mal_id}/episodes"))
+        .send()
+        .and_then(|r|
+            r.json::<ConsumetEpisodesResponse>()
+        )
+        .ok()
+}
+
+fn fetch_source_url(episode_id: &str) -> Option<String> {
+    let r = client()
+        .get(format!("{CONSUMET_BASE_URL}/episode/sources?episodeId={episode_id}"))
+        .send()
+        .and_then(|r| r.json::<ConsumetSourcesResponse>())
+        .ok()?;
+
+    // Prefer the embed URL; fall back to the first direct source URL.
+    r.embed_url
+        .or_else(|| r.sources.into_iter().next().map(|s| s.url))
 }
 
 // ── Public ────────────────────────────────────────────────────────────────────
 
-pub fn media(id: &str) -> Vec<Media> {
-    let mut items: Vec<Media> = Vec::new();
+pub fn media(mal_id: &str) -> Vec<Media> {
+    let _ = fetch_title(mal_id);
 
-    if let Some(url) = fetch_trailer_url(id) {
-        items.push(Media::Single(MediaItem {
-            media_type: MediaType::Video,
-            title:      filename_from_url(&url),
-            url,
-        }));
-    }
+    fetch_episodes(mal_id)
+        .map(|r| r.episodes)
+        .unwrap_or_default()
+        .into_iter()
+        .filter_map(|ep| {
+            let embed_url = fetch_source_url(&ep.id)?;
+            let title = ep.title
+                .unwrap_or_else(|| format!("Episode {}", ep.number.unwrap_or(0)));
 
-    items
+            Some(Media::Single(MediaItem {
+                media_type: MediaType::Video,
+                title,
+                url: embed_url,
+            }))
+        })
+        .collect()
 }
-
-
-

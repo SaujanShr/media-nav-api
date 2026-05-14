@@ -2,7 +2,7 @@ use reqwest::blocking::Client;
 use plugin_sdk::library_item::LibraryItem;
 use plugin_sdk::plugin::{FetchRequest, FetchResult};
 
-use crate::client::{client, BASE_URL};
+use crate::client::{client, JIKAN_BASE_URL};
 use crate::schema::parse;
 use crate::types::JikanSearchResponse;
 
@@ -12,7 +12,7 @@ fn build_url(req: &FetchRequest) -> String {
     let params = parse(&req.query);
 
     let mut url = format!(
-        "{BASE_URL}/anime?limit={}&page={}&order_by={}&sort={}",
+        "{JIKAN_BASE_URL}/anime?limit={}&page={}&order_by={}&sort={}",
         req.page_size, req.page, params.order_by, params.sort_dir,
     );
 

@@ -66,7 +66,7 @@ async fn fetch(
     }
 }
 
-/// `GET /api/media/{plugin_id}/enrich/{item_id}`
+/// `GET /media/{plugin_id}/enrich/{item_id}`
 #[get("/{plugin_id}/enrich/{item_id}")]
 async fn enrich(
     state: Data<AppState>,
@@ -81,7 +81,7 @@ async fn enrich(
     }
 }
 
-/// `GET /api/media/{plugin_id}/library/{library_item_id}/media
+/// `GET /media/{plugin_id}/library/{library_item_id}/media`
 #[get("/{plugin_id}/library/{library_item_id}/media")]
 async fn media(
     state: Data<AppState>,

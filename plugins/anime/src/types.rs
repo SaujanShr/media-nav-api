@@ -261,56 +261,33 @@ pub struct JikanAnimeResponse {
     pub data: JikanAnime,
 }
 
-// ── Aniwatch ──────────────────────────────────────────────────────────────────
+// ── Consumet ──────────────────────────────────────────────────────────────────
 
 #[derive(Deserialize)]
-pub struct AniwatchAnime {
-    pub id:   String,
-    pub name: String,
+pub struct ConsumetEpisode {
+    pub id:     String,
+    pub title:  Option<String>,
+    pub number: Option<u32>,
 }
 
 #[derive(Deserialize)]
-pub struct AniwatchSearchData {
-    pub animes: Vec<AniwatchAnime>,
+pub struct ConsumetEpisodesResponse {
+    pub episodes: Vec<ConsumetEpisode>,
 }
 
 #[derive(Deserialize)]
-pub struct AniwatchSearchResponse {
-    pub data: AniwatchSearchData,
-}
-
-#[derive(Deserialize)]
-pub struct AniwatchEpisode {
-    pub title:       Option<String>,
-    #[serde(rename = "episodeId")]
-    pub episode_id:  String,
-    pub number:      u32,
-}
-
-#[derive(Deserialize)]
-pub struct AniwatchEpisodesData {
-    pub episodes: Vec<AniwatchEpisode>,
-}
-
-#[derive(Deserialize)]
-pub struct AniwatchEpisodesResponse {
-    pub data: AniwatchEpisodesData,
-}
-
-#[derive(Deserialize)]
-pub struct AniwatchSource {
+pub struct ConsumetSource {
     pub url:     String,
     #[serde(rename = "isM3U8")]
     pub is_m3u8: bool,
+    pub quality: Option<String>,
 }
 
 #[derive(Deserialize)]
-pub struct AniwatchSourcesData {
-    pub sources: Vec<AniwatchSource>,
+pub struct ConsumetSourcesResponse {
+    pub sources:   Vec<ConsumetSource>,
+    #[serde(rename = "embedURL")]
+    pub embed_url: Option<String>,
 }
 
-#[derive(Deserialize)]
-pub struct AniwatchSourcesResponse {
-    pub data: AniwatchSourcesData,
-}
 

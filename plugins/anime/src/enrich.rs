@@ -4,14 +4,14 @@ use plugin_sdk::utils::filename_from_url;
 use plugin_sdk::push_attr;
 use reqwest::blocking::Client;
 
-use crate::client::{client, BASE_URL};
+use crate::client::{client, JIKAN_BASE_URL};
 use crate::types::{JikanAnime, JikanAnimeResponse, JikanPicturesResponse};
 
 // ── Private ───────────────────────────────────────────────────────────────────
 
 fn fetch_anime(client: &Client, id: &str) -> Option<JikanAnime> {
     client
-        .get(format!("{BASE_URL}/anime/{id}"))
+        .get(format!("{JIKAN_BASE_URL}/anime/{id}"))
         .send()
         .and_then(|r| r.json::<JikanAnimeResponse>())
         .ok()
@@ -20,7 +20,7 @@ fn fetch_anime(client: &Client, id: &str) -> Option<JikanAnime> {
 
 fn fetch_pictures(client: &Client, id: &str) -> Option<JikanPicturesResponse> {
     client
-        .get(format!("{BASE_URL}/anime/{id}/pictures"))
+        .get(format!("{JIKAN_BASE_URL}/anime/{id}/pictures"))
         .send()
         .and_then(|r| r.json())
         .ok()

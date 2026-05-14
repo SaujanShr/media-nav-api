@@ -1,14 +1,18 @@
-CARGO       := $(HOME)/.cargo/bin/cargo
-PLUGINS_DIR := plugins
-EXT         := $(if $(filter Darwin,$(shell uname -s)),dylib,so)
+CARGO        := $(HOME)/.cargo/bin/cargo
+PLUGINS_DIR  := plugins
+EXT          := $(if $(filter Darwin,$(shell uname -s)),dylib,so)
 
-EXAMPLE_LIB := target/debug/libexample_plugin.$(EXT)
-ANIME_LIB   := target/debug/libanime_plugin.$(EXT)
+EXAMPLE_LIB  := target/debug/libexample_plugin.$(EXT)
+ANIME_LIB    := target/debug/libanime_plugin.$(EXT)
 
-.PHONY: run build build-plugins install-plugins clean
+CONSUMET_CTR  := consumet
+CONSUMET_PORT := 4000
+CONSUMET_PID  := .consumet.pid
 
-## Build everything and start the server
-run: build install-plugins
+.PHONY: run build build-plugins install-plugins consumet stop-consumet clean
+
+## Build everything, start consumet, and start the server
+run: build install-plugins consumet
 	$(CARGO) run --package media-nav-web
 
 ## Build the server and all plugins
@@ -28,8 +32,25 @@ install-plugins: build-plugins
 	cp $(ANIME_LIB) $(PLUGINS_DIR)/
 	codesign -s - $(PLUGINS_DIR)/libanime_plugin.$(EXT)
 
-## Remove build artefacts and installed plugins
-clean:
+## Start consumet server (no-op if already running)
+consumet:
+	@if [ -f $(CONSUMET_PID) ] && kill -0 $$(cat $(CONSUMET_PID)) 2>/dev/null; then \
+		echo "consumet already running (pid $$(cat $(CONSUMET_PID)))"; \
+	else \
+		cd providers && npm install --silent && cd consumet && npm install --silent && cd .. && PORT=$(CONSUMET_PORT) npm start > /tmp/consumet.log 2>&1 & \
+		echo $$! > $(CONSUMET_PID); \
+		echo "consumet started (pid $$(cat $(CONSUMET_PID)))"; \
+	fi
+
+## Stop consumet
+stop-consumet:
+	@if [ -f $(CONSUMET_PID) ]; then \
+		kill $$(cat $(CONSUMET_PID)) 2>/dev/null && echo "consumet stopped" || true; \
+		rm -f $(CONSUMET_PID); \
+	fi
+
+## Remove build artefacts, installed plugins, and stop consumet
+clean: stop-consumet
 	cargo clean
 	rm -f $(PLUGINS_DIR)/*.dylib $(PLUGINS_DIR)/*.so
 

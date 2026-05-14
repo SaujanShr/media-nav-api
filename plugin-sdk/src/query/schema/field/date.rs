@@ -15,22 +15,32 @@ impl DateFieldSchema {
     pub fn validate(&self, value: Option<(Option<PartialDate>, Option<PartialDate>)>) -> Result<(), String> {
         let (from, to) = value.unwrap_or((None, None));
 
+        self.validate_required(from, to)?;
+        self.validate_order(from, to)?;
+        for date in [from, to].into_iter().flatten() {
+            self.validate_granularity(date)?;
+            self.validate_bounds(date)?;
+        }
+        
+        Ok(())
+    }
+
+    fn validate_required(&self, from: Option<PartialDate>, to: Option<PartialDate>) -> Result<(), String> {
         if self.required_from && from.is_none() {
             return Err("From date is required".into());
         }
         if self.required_to && to.is_none() {
             return Err("To date is required".into());
         }
+        Ok(())
+    }
+
+    fn validate_order(&self, from: Option<PartialDate>, to: Option<PartialDate>) -> Result<(), String> {
         if let (Some(f), Some(t)) = (from, to) {
             if f > t {
                 return Err("From date must be earlier than or equal to To date".into());
             }
         }
-        for date in [from, to].into_iter().flatten() {
-            self.validate_granularity(date)?;
-            self.validate_bounds(date)?;
-        }
-
         Ok(())
     }
 

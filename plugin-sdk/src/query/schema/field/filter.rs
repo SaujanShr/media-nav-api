@@ -31,7 +31,6 @@ impl FilterFieldSchema {
         if !unsupported.is_empty() {
             return Err(format!("Unsupported selections: {}", unsupported.join(", ")))
         }
-
         Ok(())
     }
 }

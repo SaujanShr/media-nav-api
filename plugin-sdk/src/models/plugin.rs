@@ -2,6 +2,7 @@ use serde::Serialize;
 
 use crate::category::Category;
 use crate::library_item::{LibraryItem, LibraryItemDetail};
+use crate::media_item::Media;
 use crate::query::{Query, schema::QuerySchema};
 
 pub struct FetchRequest {
@@ -54,9 +55,11 @@ pub struct Plugin {
     pub metadata:  PluginMetadata,
     pub resources: PluginResources,
     #[serde(skip)]
-    pub schema: fn() -> QuerySchema,
+    pub schema:    fn() -> QuerySchema,
     #[serde(skip)]
-    pub fetch:  fn(FetchRequest) -> FetchResult,
+    pub fetch:     fn(FetchRequest) -> FetchResult,
     #[serde(skip)]
-    pub enrich: fn(&str) -> Option<LibraryItemDetail>,
+    pub enrich:    fn(&str) -> Option<LibraryItemDetail>,
+    #[serde(skip)]
+    pub media:     fn(&str) -> Vec<Media>,
 }

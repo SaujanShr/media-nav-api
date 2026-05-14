@@ -6,8 +6,13 @@ use serde_json::json;
 
 use plugin_sdk::query::Query as PluginQuery;
 
-use crate::services::plugin::{self as plugin_service, PluginError};
+use crate::services::media as media_service;
+use crate::services::plugin::PluginError;
 use crate::state::AppState;
+
+// ── Config ────────────────────────────────────────────────────────────────────
+
+const REQUESTS_PER_MINUTE: u64 = 60;
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -49,7 +54,7 @@ async fn fetch(
 ) -> impl Responder {
     let plugin_id = path.into_inner();
 
-    match plugin_service::fetch(
+    match media_service::fetch(
         &state.plugins,
         &plugin_id,
         qs.page,
@@ -69,9 +74,23 @@ async fn enrich(
 ) -> impl Responder {
     let (plugin_id, item_id) = path.into_inner();
 
-    match plugin_service::enrich(&state.plugins, &plugin_id, &item_id) {
+    match media_service::enrich(&state.plugins, &plugin_id, &item_id) {
         Ok(Some(detail)) => HttpResponse::Ok().json(detail),
         Ok(None) => HttpResponse::NotFound().json(json!({ "error": "item not found" })),
+        Err(e) => error_response(e),
+    }
+}
+
+/// `GET /api/media/{plugin_id}/library/{library_item_id}/media
+#[get("/{plugin_id}/library/{library_item_id}/media")]
+async fn media(
+    state: Data<AppState>,
+    path: Path<(String, String)>,
+) -> impl Responder {
+    let (plugin_id, library_item_id) = path.into_inner();
+
+    match media_service::media(&state.plugins, &plugin_id, &library_item_id) {
+        Ok(media) => HttpResponse::Ok().json(media),
         Err(e) => error_response(e),
     }
 }
@@ -80,7 +99,7 @@ async fn enrich(
 
 pub fn public_routes(cfg: &mut ServiceConfig) {
     let governor_conf = GovernorConfigBuilder::default()
-        .requests_per_minute(60)
+        .requests_per_minute(REQUESTS_PER_MINUTE)
         .finish()
         .unwrap();
 
@@ -88,7 +107,8 @@ pub fn public_routes(cfg: &mut ServiceConfig) {
         scope("/media")
             .wrap(Governor::new(&governor_conf))
             .service(fetch)
-            .service(enrich),
+            .service(enrich)
+            .service(media),
     );
 }
 

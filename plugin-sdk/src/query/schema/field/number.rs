@@ -1,3 +1,5 @@
+use crate::query::partial_date::PartialDate;
+
 /// Numeric range field. Bounds are `[from, to]`; either may be `None`.
 pub struct NumberFieldSchema {
     pub min:            Option<f32>,
@@ -14,21 +16,31 @@ impl NumberFieldSchema {
     pub fn validate(&self, value: Option<(Option<f32>, Option<f32>)>) -> Result<(), String> {
         let (from, to) = value.unwrap_or((None, None));
 
+        self.validate_required(from, to)?;
+        self.validate_order(from, to)?;
+        for n in [from, to].into_iter().flatten() {
+            self.validate_number(n)?;
+        }
+        
+        Ok(())
+    }
+
+    fn validate_required(&self, from: Option<f32>, to: Option<f32>) -> Result<(), String> {
         if self.required_from && from.is_none() {
             return Err("From value is required".into());
         }
         if self.required_to && to.is_none() {
             return Err("To value is required".into());
         }
+        Ok(())
+    }
+
+    fn validate_order(&self, from: Option<f32>, to: Option<f32>) -> Result<(), String> {
         if let (Some(f), Some(t)) = (from, to) {
             if f > t {
                 return Err("From value must be less than or equal to To value".into());
             }
         }
-        for n in [from, to].into_iter().flatten() {
-            self.validate_number(n)?;
-        }
-
         Ok(())
     }
 
@@ -46,7 +58,6 @@ impl NumberFieldSchema {
                 return Err(format!("Maximum value is {max}"));
             }
         }
-        
         Ok(())
     }
 }

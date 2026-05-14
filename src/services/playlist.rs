@@ -46,41 +46,44 @@ async fn resolve_library_item(pool: &PgPool, user_library_item_id: &str, user_id
     Ok(())
 }
 
+fn is_duplicate_key(e: &sqlx::Error) -> bool {
+    matches!(e,
+        Database(db)
+        if db.code().as_deref() == Some("23505")
+    )
+}
+
 fn target_index(rest: &[f64], index: usize) -> f64 {
-    if rest.is_empty() { return 0.0; }
-    if index == 0 { return rest[0] - 1.0; }
-    if index >= rest.len() { return rest[rest.len() - 1] + 1.0; }
+    if rest.is_empty()       { return 0.0; }
+    if index == 0            { return rest[0] - 1.0; }
+    if index >= rest.len()   { return rest[rest.len() - 1] + 1.0; }
     (rest[index - 1] + rest[index]) / 2.0
 }
 
 fn gap_too_small(rest: &[f64], index: usize, new_index: f64) -> bool {
     let left  = index.checked_sub(1).and_then(|i| rest.get(i)).copied();
     let right = rest.get(index).copied();
-    match (left, right) {
-        (Some(l), Some(r)) => (new_index - l) < INDEX_GAP_THRESHOLD || (r - new_index) < INDEX_GAP_THRESHOLD,
-        (Some(l), None)    => (new_index - l) < INDEX_GAP_THRESHOLD,
-        (None,    Some(r)) => (r - new_index) < INDEX_GAP_THRESHOLD,
-        (None,    None)    => false,
-    }
+
+    left.is_some_and(|l|  new_index - l  < INDEX_GAP_THRESHOLD)
+        || right.is_some_and(|r| r - new_index < INDEX_GAP_THRESHOLD)
 }
 
-async fn normalize(
-    pool: &PgPool,
-    rest: &[&PlaylistItem],
-    index: usize,
-) -> Result<f64, PlaylistError> {
-    let norm_updates: Vec<(String, f64)> = rest
+async fn normalize(pool: &PgPool, rest: &[&PlaylistItem], index: usize) -> Result<f64, PlaylistError> {
+    let updates: Vec<(String, f64)> = rest
         .iter()
         .enumerate()
         .map(|(i, item)| (item.id.clone(), i as f64))
         .collect();
 
-    playlist_repo::set_item_indices(pool, norm_updates)
+    playlist_repo::set_item_indices(pool, updates)
         .await
         .map_err(|_| PlaylistError::Internal)?;
 
-    let clean_indices: Vec<f64> = (0..rest.len()).map(|i| i as f64).collect();
-    Ok(target_index(&clean_indices, index))
+    let normalized: Vec<f64> = (0..rest.len())
+        .map(|i| i as f64)
+        .collect();
+
+    Ok(target_index(&normalized, index))
 }
 
 // ── Public ────────────────────────────────────────────────────────────────────
@@ -104,9 +107,8 @@ pub async fn delete(pool: &PgPool, user_id: &str, playlist_id: &str) -> Result<(
 
     playlist_repo::delete(pool, playlist_id)
         .await
-        .map_err(|_| PlaylistError::Internal)?;
-
-    Ok(())
+        .map_err(|_| PlaylistError::Internal)
+        .map(|_| ())
 }
 
 pub async fn rename(pool: &PgPool, user_id: &str, playlist_id: &str, name: &str) -> Result<Playlist, PlaylistError> {
@@ -136,17 +138,9 @@ pub async fn add_item(
     resolve_library_item(pool, user_library_item_id, user_id).await?;
 
     let id = Uuid::new_v4().to_string();
-
     playlist_repo::add_item(pool, &id, playlist_id, user_library_item_id)
         .await
-        .map_err(|e| {
-            if let Database(ref db_err) = e {
-                if db_err.code().as_deref() == Some("23505") {
-                    return PlaylistError::AlreadyAdded;
-                }
-            }
-            PlaylistError::Internal
-        })
+        .map_err(|e| if is_duplicate_key(&e) { PlaylistError::AlreadyAdded } else { PlaylistError::Internal })
 }
 
 pub async fn remove_item(
@@ -160,8 +154,11 @@ pub async fn remove_item(
     let deleted = playlist_repo::remove_item(pool, playlist_id, user_library_item_id)
         .await
         .map_err(|_| PlaylistError::Internal)?;
+    if !deleted {
+        return Err(PlaylistError::NotFound);
+    }
 
-    if deleted { Ok(()) } else { Err(PlaylistError::NotFound) }
+    Ok(())
 }
 
 pub async fn move_item(
@@ -176,16 +173,14 @@ pub async fn move_item(
     let items = playlist_repo::list_items(pool, playlist_id)
         .await
         .map_err(|_| PlaylistError::Internal)?;
-
     if !items.iter().any(|i| i.id == item_id) {
         return Err(PlaylistError::NotFound);
     }
 
     let rest: Vec<&PlaylistItem> = items.iter().filter(|i| i.id != item_id).collect();
-    let rest_indices: Vec<f64> = rest.iter().map(|i| i.index).collect();
+    let rest_indices: Vec<f64>   = rest.iter().map(|i| i.index).collect();
 
     let new_index = target_index(&rest_indices, index);
-
     let new_index = if gap_too_small(&rest_indices, index, new_index) {
         normalize(pool, &rest, index).await?
     } else {
@@ -197,4 +192,3 @@ pub async fn move_item(
         .map_err(|_| PlaylistError::Internal)?
         .ok_or(PlaylistError::NotFound)
 }
-

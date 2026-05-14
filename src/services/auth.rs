@@ -29,7 +29,13 @@ fn build_result(user: &User, secret: &str) -> Result<AuthResult, AuthError> {
     let token = create_token(&user.id, secret)
         .map_err(|_| AuthError::Internal)?;
 
-    Ok(AuthResult { token, user_id: user.id.clone(), username: user.username.clone() })
+    let result = AuthResult {
+        token,
+        user_id: user.id.clone(),
+        username: user.username.clone()
+    };
+
+    Ok(result)
 }
 
 // ── Public ────────────────────────────────────────────────────────────────────

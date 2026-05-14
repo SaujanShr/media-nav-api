@@ -1,12 +1,10 @@
-use sqlx::PgPool;
+use sqlx::{PgPool, Error::Database};
 use uuid::Uuid;
 
-use plugin_sdk::library_item::LibraryItemDetail;
-use plugin_sdk::plugin::{FetchRequest, FetchResult, Plugin};
-use plugin_sdk::query::Query;
+use plugin_sdk::plugin::Plugin;
 
 use crate::models::plugin::UserPlugin;
-use crate::plugins::{PluginRegistry};
+use crate::plugins::PluginRegistry;
 use crate::repositories::plugin as plugin_repo;
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -18,42 +16,19 @@ pub enum PluginError {
     Internal,
 }
 
+// ── Private ───────────────────────────────────────────────────────────────────
+
+fn is_duplicate_key(e: &sqlx::Error) -> bool {
+    matches!(e,
+        Database(db)
+        if db.code().as_deref() == Some("23505")
+    )
+}
+
 // ── Public ────────────────────────────────────────────────────────────────────
 
 pub fn list_all(registry: &PluginRegistry) -> Vec<&Plugin> {
     registry.plugins().collect()
-}
-
-pub fn enrich(
-    registry: &PluginRegistry,
-    plugin_id: &str,
-    item_id: &str,
-) -> Result<Option<LibraryItemDetail>, PluginError> {
-    let plugin = registry
-        .get(plugin_id)
-        .ok_or(PluginError::NotFound)?;
-
-    let result = (plugin.enrich)(
-        item_id
-    );
-
-    Ok(result)
-}
-
-pub fn fetch(
-    registry: &PluginRegistry,
-    plugin_id: &str,
-    page: u32,
-    page_size: u32,
-    query: Query,
-) -> Result<FetchResult, PluginError> {
-    let plugin = registry
-        .get(plugin_id)
-        .ok_or(PluginError::NotFound)?;
-
-    let result = (plugin.fetch)(FetchRequest { page, page_size, query });
-
-    Ok(result)
 }
 
 pub async fn list(pool: &PgPool, user_id: &str) -> Result<Vec<UserPlugin>, PluginError> {
@@ -62,27 +37,30 @@ pub async fn list(pool: &PgPool, user_id: &str) -> Result<Vec<UserPlugin>, Plugi
         .map_err(|_| PluginError::Internal)
 }
 
-pub async fn install(pool: &PgPool, user_id: &str, plugin_id: &str) -> Result<UserPlugin, PluginError> {
+pub async fn install(
+    pool: &PgPool,
+    user_id: &str,
+    plugin_id: &str,
+) -> Result<UserPlugin, PluginError> {
     let id = Uuid::new_v4().to_string();
 
     plugin_repo::install(pool, &id, user_id, plugin_id)
         .await
-        .map_err(|e| {
-            if let sqlx::Error::Database(ref db_err) = e {
-                if db_err.code().as_deref() == Some("23505") {
-                    return PluginError::AlreadyInstalled;
-                }
-            }
-            PluginError::Internal
-        })
+        .map_err(|e|
+            if is_duplicate_key(&e) { PluginError::AlreadyInstalled }
+            else { PluginError::Internal }
+        )
 }
 
 pub async fn uninstall(pool: &PgPool, user_id: &str, plugin_id: &str) -> Result<(), PluginError> {
     let deleted = plugin_repo::uninstall(pool, user_id, plugin_id)
         .await
         .map_err(|_| PluginError::Internal)?;
+    if !deleted {
+        return Err(PluginError::Internal);
+    }
 
-    if deleted { Ok(()) } else { Err(PluginError::NotFound) }
+    Ok(())
 }
 
 pub async fn set_enabled(

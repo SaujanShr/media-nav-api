@@ -1,4 +1,4 @@
-use sqlx::PgPool;
+use sqlx::{PgPool, Error::Database};
 use uuid::Uuid;
 
 use crate::models::library_item::UserLibraryItem;
@@ -30,6 +30,13 @@ async fn resolve_plugin(pool: &PgPool, user_plugin_id: &str, user_id: &str) -> R
     Ok(())
 }
 
+fn is_duplicate_key(e: &sqlx::Error) -> bool {
+    matches!(e,
+        Database(db)
+        if db.code().as_deref() == Some("23505")
+    )
+}
+
 // ── Public ────────────────────────────────────────────────────────────────────
 
 pub async fn list(pool: &PgPool, user_plugin_id: &str, user_id: &str) -> Result<Vec<UserLibraryItem>, LibraryItemError> {
@@ -44,17 +51,12 @@ pub async fn add(pool: &PgPool, user_plugin_id: &str, user_id: &str, library_ite
     resolve_plugin(pool, user_plugin_id, user_id).await?;
 
     let id = Uuid::new_v4().to_string();
-
     library_item_repo::add(pool, &id, user_plugin_id, library_item_id)
         .await
-        .map_err(|e| {
-            if let sqlx::Error::Database(ref db_err) = e {
-                if db_err.code().as_deref() == Some("23505") {
-                    return LibraryItemError::AlreadyAdded;
-                }
-            }
-            LibraryItemError::Internal
-        })
+        .map_err(|e|
+            if is_duplicate_key(&e) { LibraryItemError::AlreadyAdded }
+            else { LibraryItemError::Internal }
+        )
 }
 
 pub async fn remove(pool: &PgPool, user_plugin_id: &str, user_id: &str, library_item_id: &str) -> Result<(), LibraryItemError> {
@@ -63,7 +65,9 @@ pub async fn remove(pool: &PgPool, user_plugin_id: &str, user_id: &str, library_
     let deleted = library_item_repo::remove(pool, user_plugin_id, library_item_id)
         .await
         .map_err(|_| LibraryItemError::Internal)?;
+    if !deleted {
+        return Err(LibraryItemError::Internal);
+    }
 
-    if deleted { Ok(()) } else { Err(LibraryItemError::NotFound) }
+    Ok(())
 }
-

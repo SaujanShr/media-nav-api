@@ -1,7 +1,7 @@
 use plugin_sdk::category::Category;
 use plugin_sdk::plugin::{Plugin, PluginMetadata, PluginResources};
 
-use crate::{enrich, fetch, schema};
+use crate::{enrich, fetch, media, schema};
 
 pub const PLUGIN: Plugin = Plugin {
     id:      "example",
@@ -16,8 +16,9 @@ pub const PLUGIN: Plugin = Plugin {
         icon_url:   "https://example.com/icon.png",
         banner_url: "https://example.com/banner.png",
     },
-    schema: schema::schema,
-    fetch:  fetch::fetch,
-    enrich: enrich::enrich,
+    schema:    schema::schema,
+    fetch:     fetch::fetch,
+    enrich:    enrich::enrich,
+    media:     media::media,
 };
 

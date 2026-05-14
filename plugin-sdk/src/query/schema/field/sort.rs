@@ -2,23 +2,16 @@ use crate::query::expression::{SortDirection, SortExpression, SortOption};
 
 pub struct SortFieldSchema {
     pub supported:         Vec<SortOption>,
-    pub required:          bool,
     pub default_sort:      String,
     pub default_direction: SortDirection,
 }
 
 impl SortFieldSchema {
     pub fn validate(&self, value: Option<&SortExpression>) -> Result<(), String> {
-        match value {
-            None => {
-                if self.required {
-                    Err("This field is required".into())
-                } else {
-                    Ok(())
-                }
-            }
-            Some(expr) => self.validate_sort(expr),
+        if let Some(expr) = value {
+            self.validate_sort(expr)?;
         }
+        Ok(())
     }
 
     fn validate_sort(&self, expr: &SortExpression) -> Result<(), String> {

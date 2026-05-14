@@ -7,28 +7,30 @@ pub struct SearchFieldSchema {
 
 impl SearchFieldSchema {
     pub fn validate(&self, value: Option<&str>) -> Result<(), String> {
-        match value.filter(|s| !s.trim().is_empty()) {
-            None => {
-                if self.required {
-                    Err("This field is required".into())
-                } else {
-                    Ok(())
-                }
-            }
-            Some(s) => {
-                if let Some(min) = self.min_length {
-                    if s.len() < min {
-                        return Err(format!("Minimum length is {min}"));
-                    }
-                }
-                if let Some(max) = self.max_length {
-                    if s.len() > max {
-                        return Err(format!("Maximum length is {max}"));
-                    }
-                }
-                
-                Ok(())
-            }
+        let value = value.filter(|s| !s.trim().is_empty());
+
+        self.validate_required(value)?;
+        if let Some(s) = value {
+            self.validate_length(s)?;
         }
+
+        Ok(())
+    }
+
+    fn validate_required(&self, value: Option<&str>) -> Result<(), String> {
+        if self.required && value.is_none() {
+            return Err("This field is required".into());
+        }
+        Ok(())
+    }
+
+    fn  validate_length(&self, value: &str) -> Result<(), String> {
+        if let Some(min) = self.min_length {
+            if value.len() < min { return Err(format!("Minimum length is {min}")); }
+        }
+        if let Some(max) = self.max_length {
+            if value.len() > max { return Err(format!("Maximum length is {max}")); }
+        }
+        Ok(())
     }
 }

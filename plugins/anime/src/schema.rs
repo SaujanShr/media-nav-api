@@ -143,7 +143,6 @@ pub fn schema() -> QuerySchema {
         supported: AnimeOrderBy::all().iter().map(|v| SortOption {
             sort: v.to_string(), ascending: true, descending: true,
         }).collect::<Vec<_>>(),
-        required: true,
         default_sort: AnimeOrderBy::Score.to_string(),
         default_direction: SortDirection::Desc,
     }));

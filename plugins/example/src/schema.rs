@@ -20,7 +20,6 @@ pub fn schema() -> QuerySchema {
                 descending: true
             },
         ],
-        required:          false,
         default_sort:      "title".to_string(),
         default_direction: SortDirection::Asc,
     }));

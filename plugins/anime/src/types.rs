@@ -260,3 +260,57 @@ pub struct JikanSearchResponse {
 pub struct JikanAnimeResponse {
     pub data: JikanAnime,
 }
+
+// ── Aniwatch ──────────────────────────────────────────────────────────────────
+
+#[derive(Deserialize)]
+pub struct AniwatchAnime {
+    pub id:   String,
+    pub name: String,
+}
+
+#[derive(Deserialize)]
+pub struct AniwatchSearchData {
+    pub animes: Vec<AniwatchAnime>,
+}
+
+#[derive(Deserialize)]
+pub struct AniwatchSearchResponse {
+    pub data: AniwatchSearchData,
+}
+
+#[derive(Deserialize)]
+pub struct AniwatchEpisode {
+    pub title:       Option<String>,
+    #[serde(rename = "episodeId")]
+    pub episode_id:  String,
+    pub number:      u32,
+}
+
+#[derive(Deserialize)]
+pub struct AniwatchEpisodesData {
+    pub episodes: Vec<AniwatchEpisode>,
+}
+
+#[derive(Deserialize)]
+pub struct AniwatchEpisodesResponse {
+    pub data: AniwatchEpisodesData,
+}
+
+#[derive(Deserialize)]
+pub struct AniwatchSource {
+    pub url:     String,
+    #[serde(rename = "isM3U8")]
+    pub is_m3u8: bool,
+}
+
+#[derive(Deserialize)]
+pub struct AniwatchSourcesData {
+    pub sources: Vec<AniwatchSource>,
+}
+
+#[derive(Deserialize)]
+pub struct AniwatchSourcesResponse {
+    pub data: AniwatchSourcesData,
+}
+

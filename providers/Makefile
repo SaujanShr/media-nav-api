@@ -1,6 +1,6 @@
 CONSUMET_DIR  := consumet
 CONSUMET_LIB  := $(CONSUMET_DIR)/consumet.ts
-CONSUMET_REPO := https://github.com/consumet/consumet.ts
+CONSUMET_REPO := https://github.com/prince-ao/consumet.ts
 CONSUMET_PID  := .consumet.pid
 CONSUMET_LOG  := /tmp/consumet.log
 PORT          ?= 4000

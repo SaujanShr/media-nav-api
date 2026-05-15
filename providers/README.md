@@ -6,7 +6,7 @@ This directory contains external provider servers that supply media data to the 
 
 ## consumet
 
-A lightweight Express server that wraps the [consumet.ts](https://github.com/consumet/consumet.ts) library to expose anime episode listings and streaming source endpoints.
+A lightweight Express server that wraps the [consumet.ts](https://github.com/prince-ao/consumet.ts) library to expose anime episode listings and streaming source endpoints.
 
 ### Dependencies
 

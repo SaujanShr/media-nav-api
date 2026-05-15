@@ -3,7 +3,7 @@ members = [".", "plugin-sdk", "plugins/example", "plugins/anime"]
 resolver = "2"
 
 [package]
-name = "media-nav-web"
+name = "media-nav-api"
 version = "0.1.0"
 edition = "2024"
 

@@ -13,11 +13,11 @@ CONSUMET_PID  := .consumet.pid
 
 ## Build everything, start consumet, and start the server
 run: build install-plugins consumet
-	$(CARGO) run --package media-nav-web
+	$(CARGO) run --package media-nav-api
 
 ## Build the server and all plugins
 build: build-plugins
-	$(CARGO) build --package media-nav-web
+	$(CARGO) build --package media-nav-api
 
 ## Build all plugin dylibs
 build-plugins:

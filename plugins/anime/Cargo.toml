@@ -10,5 +10,3 @@ crate-type = ["cdylib"]
 plugin-sdk   = { path = "../../plugin-sdk" }
 reqwest      = { version = "0.13", features = ["blocking", "json"] }
 serde        = { version = "1.0", features = ["derive"] }
-urlencoding  = "2"
-

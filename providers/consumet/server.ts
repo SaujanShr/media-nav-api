@@ -1,9 +1,9 @@
 import express, { Request, Response } from 'express';
-import { ANIME, META } from './consumet/src';
+import { ANIME, META } from './consumet.ts/src';
 
 const app  = express();
 const port = Number(process.env.PORT ?? 4000);
-const mal  = new META.Myanimelist(new ANIME.AnimePahe());
+const mal  = new META.Anilist(new ANIME.AnimePahe());
 
 // ── Routes ─────────────────────────────────────────────────────────────────────
 

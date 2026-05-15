@@ -3,7 +3,7 @@ CONSUMET_LIB  := $(CONSUMET_DIR)/consumet.ts
 CONSUMET_REPO := https://github.com/prince-ao/consumet.ts
 CONSUMET_PID  := .consumet.pid
 CONSUMET_LOG  := /tmp/consumet.log
-PORT          ?= 4000
+NPM           := npm --registry https://registry.npmjs.org
 
 .PHONY: help setup setup-consumet clone-consumet install-consumet install-server \
         start-consumet stop-consumet update-consumet clean-consumet clean
@@ -28,11 +28,11 @@ clone-consumet: ## Clone the consumet.ts library (skipped if already present)
 
 install-consumet: ## Install consumet.ts npm dependencies
 	@echo "→ Installing consumet.ts dependencies..."
-	cd $(CONSUMET_LIB) && npm install
+	cd $(CONSUMET_LIB) && $(NPM) install
 
 install-server: ## Install consumet server npm dependencies
 	@echo "→ Installing consumet server dependencies..."
-	cd $(CONSUMET_DIR) && npm install
+	cd $(CONSUMET_DIR) && $(NPM) install
 
 # ── Run ────────────────────────────────────────────────────────────────────────
 
@@ -41,7 +41,7 @@ start-consumet: ## Start the consumet provider server in the background (PORT=40
 		echo "→ consumet already running (pid $$(cat $(CONSUMET_PID)))"; \
 	else \
 		echo "→ Starting consumet server on port $(PORT) (log: $(CONSUMET_LOG))..."; \
-		cd $(CONSUMET_DIR) && PORT=$(PORT) npm start > $(CONSUMET_LOG) 2>&1 & \
+		cd $(CONSUMET_DIR) && PORT=$(PORT) $(NPM) start > $(CONSUMET_LOG) 2>&1 & \
 		echo $$! > ../$(CONSUMET_PID); \
 		echo "→ consumet started (pid $$(cat ../$(CONSUMET_PID)))"; \
 	fi
@@ -60,7 +60,7 @@ stop-consumet: ## Stop the consumet provider server
 update-consumet: ## Pull the latest consumet.ts changes
 	@echo "→ Updating consumet.ts..."
 	cd $(CONSUMET_LIB) && git pull
-	cd $(CONSUMET_LIB) && npm install
+	cd $(CONSUMET_LIB) && $(NPM) install
 
 clean-consumet: ## Remove cloned consumet.ts and node_modules
 	@echo "→ Cleaning consumet..."

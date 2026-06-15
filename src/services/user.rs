@@ -5,7 +5,6 @@ use crate::repositories::user as user_repo;
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-#[derive(Debug)]
 pub enum UserSettingsError {
     NotFound,
     Internal,
@@ -27,4 +26,3 @@ pub async fn set_nsfw_enabled(pool: &PgPool, user_id: &str, nsfw_enabled: bool) 
         .await
         .map_err(|_| UserSettingsError::Internal)
 }
-

@@ -11,7 +11,6 @@ type CreatePluginFn = unsafe extern "C" fn() -> *mut Plugin;
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-#[derive(Debug)]
 pub enum RegistryError {
     Io(io::Error),
     Load(libloading::Error),

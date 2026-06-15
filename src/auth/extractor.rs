@@ -9,6 +9,8 @@ use actix_web_httpauth::headers::www_authenticate::bearer::Bearer;
 use crate::auth::{validate_token, Claims};
 use crate::state::AppState;
 
+// ── Public ────────────────────────────────────────────────────────────────────
+
 pub fn claims(req: &HttpRequest) -> Result<Claims, Error> {
     req.extensions()
         .get::<Claims>()
@@ -24,12 +26,15 @@ pub async fn bearer_validator(
     req: ServiceRequest,
     creds: BearerAuth,
 ) -> Result<ServiceRequest, (Error, ServiceRequest)> {
-    let secret = req
-        .app_data::<Data<AppState>>()
-        .map(|s| s.jwt_secret.clone())
-        .unwrap_or_default();
+    let secret = match req.app_data::<Data<AppState>>() {
+        Some(state) => &state.jwt_secret,
+        None => {
+            let error = AuthenticationError::new(Bearer::default());
+            return Err((error.into(), req));
+        }
+    };
 
-    match validate_token(creds.token(), &secret) {
+    match validate_token(creds.token(), secret) {
         Ok(claims) => {
             req.extensions_mut().insert(claims);
             Ok(req)

@@ -6,6 +6,7 @@ use uuid::Uuid;
 use crate::auth::create_token;
 use crate::models::user::User;
 use crate::repositories::user as user_repo;
+use crate::validation::{validate_username, validate_password};
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -16,10 +17,10 @@ pub struct AuthResult {
     pub username: String,
 }
 
-#[derive(Debug)]
 pub enum AuthError {
     UsernameTaken,
     InvalidCredentials,
+    ValidationError(String),
     Internal,
 }
 
@@ -41,9 +42,15 @@ fn build_result(user: &User, secret: &str) -> Result<AuthResult, AuthError> {
 // ── Public ────────────────────────────────────────────────────────────────────
 
 pub async fn register(pool: &PgPool, username: &str, password: &str, secret: &str) -> Result<AuthResult, AuthError> {
+    validate_username(username).map_err(AuthError::ValidationError)?;
+    validate_password(password).map_err(AuthError::ValidationError)?;
+
     let existing = user_repo::find_by_username(pool, username)
         .await
-        .map_err(|_| AuthError::Internal)?;
+        .map_err(|e| {
+            tracing::error!("Database error checking username existence: {}", e);
+            AuthError::Internal
+        })?;
 
     if existing.is_some() {
         return Err(AuthError::UsernameTaken);
@@ -51,15 +58,24 @@ pub async fn register(pool: &PgPool, username: &str, password: &str, secret: &st
 
     let id = Uuid::new_v4().to_string();
     let password_hash = hash(password, DEFAULT_COST)
-        .map_err(|_| AuthError::Internal)?;
+        .map_err(|e| {
+            tracing::error!("Bcrypt hash error: {}", e);
+            AuthError::Internal
+        })?;
 
     user_repo::create(pool, &id, username, &password_hash)
         .await
-        .map_err(|_| AuthError::Internal)?;
+        .map_err(|e| {
+            tracing::error!("Database error creating user: {}", e);
+            AuthError::Internal
+        })?;
 
     let user = user_repo::find_by_username(pool, username)
         .await
-        .map_err(|_| AuthError::Internal)?
+        .map_err(|e| {
+            tracing::error!("Database error finding user after creation: {}", e);
+            AuthError::Internal
+        })?
         .ok_or(AuthError::Internal)?;
 
     build_result(&user, secret)
@@ -68,7 +84,10 @@ pub async fn register(pool: &PgPool, username: &str, password: &str, secret: &st
 pub async fn login(pool: &PgPool, username: &str, password: &str, secret: &str) -> Result<AuthResult, AuthError> {
     let user = user_repo::find_by_username(pool, username)
         .await
-        .map_err(|_| AuthError::Internal)?
+        .map_err(|e| {
+            tracing::error!("Database error finding user during login: {}", e);
+            AuthError::Internal
+        })?
         .ok_or(AuthError::InvalidCredentials)?;
 
     if !verify(password, &user.password_hash).unwrap_or(false) {

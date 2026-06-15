@@ -12,6 +12,9 @@ pub struct NumberFieldSchema {
 }
 
 impl NumberFieldSchema {
+
+    // ── Public ────────────────────────────────────────────────────────────────
+
     pub fn validate(&self, value: Option<(Option<f32>, Option<f32>)>) -> Result<(), String> {
         let (from, to) = value.unwrap_or((None, None));
 
@@ -23,6 +26,8 @@ impl NumberFieldSchema {
 
         Ok(())
     }
+
+    // ── Private ───────────────────────────────────────────────────────────────
 
     fn validate_required(&self, from: Option<f32>, to: Option<f32>) -> Result<(), String> {
         if self.required_from && from.is_none() {

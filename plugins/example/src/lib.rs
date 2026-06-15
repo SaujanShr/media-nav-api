@@ -1,6 +1,5 @@
 mod enrich;
 mod fetch;
-mod media;
 mod plugin;
 mod schema;
 

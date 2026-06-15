@@ -26,6 +26,8 @@ fn error_response(err: AuthError) -> HttpResponse {
             HttpResponse::Conflict().json(json!({ "error": "username already taken" })),
         AuthError::InvalidCredentials =>
             HttpResponse::Unauthorized().json(json!({ "error": "invalid credentials" })),
+        AuthError::ValidationError(msg) =>
+            HttpResponse::BadRequest().json(json!({ "error": msg })),
         AuthError::Internal =>
             HttpResponse::InternalServerError().json(json!({ "error": "internal server error" })),
     }
@@ -33,29 +35,22 @@ fn error_response(err: AuthError) -> HttpResponse {
 
 // ── Handlers ──────────────────────────────────────────────────────────────────
 
-/// `POST /auth/register`
-///
-/// Body: `{ "username": "alice", "password": "secret" }`
 #[post("/register")]
 async fn register(state: Data<AppState>, body: Json<AuthRequest>) -> impl Responder {
-    match auth_service::register(&state.db, &body.username, &body.password, &state.jwt_secret).await {
-        Ok(result) => HttpResponse::Created().json(result),
-        Err(e) => error_response(e),
-    }
+    auth_service::register(&state.db, &body.username, &body.password, &state.jwt_secret)
+        .await
+        .map(|result| HttpResponse::Created().json(result))
+        .unwrap_or_else(error_response)
 }
 
-/// `POST /auth/login`
-///
-/// Body: `{ "username": "alice", "password": "secret" }`
 #[post("/login")]
 async fn login(state: Data<AppState>, body: Json<AuthRequest>) -> impl Responder {
-    match auth_service::login(&state.db, &body.username, &body.password, &state.jwt_secret).await {
-        Ok(result) => HttpResponse::Ok().json(result),
-        Err(e) => error_response(e),
-    }
+    auth_service::login(&state.db, &body.username, &body.password, &state.jwt_secret)
+        .await
+        .map(|result| HttpResponse::Ok().json(result))
+        .unwrap_or_else(error_response)
 }
 
-/// `GET /api/auth/me`
 #[get("/me")]
 async fn me(req: HttpRequest) -> impl Responder {
     let claims = assert_ok!(extractor::claims(&req));

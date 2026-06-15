@@ -43,7 +43,6 @@ fn error_response(err: PluginError) -> HttpResponse {
 // ── Handlers ──────────────────────────────────────────────────────────────────
 
 /// `POST /media/{plugin_id}/fetch?page={page}&pageSize={page_size}`
-///
 /// Body (optional): `{ "query": { "search_fields": { "search": "foo" }, ... } }`
 #[post("/{plugin_id}/fetch")]
 async fn fetch(
@@ -54,16 +53,9 @@ async fn fetch(
 ) -> impl Responder {
     let plugin_id = path.into_inner();
 
-    match media_service::fetch(
-        &state.plugins,
-        &plugin_id,
-        qs.page,
-        qs.page_size,
-        body.into_inner().query,
-    ) {
-        Ok(result) => HttpResponse::Ok().json(result),
-        Err(e) => error_response(e),
-    }
+    media_service::fetch(&state.plugins, &plugin_id, qs.page, qs.page_size, body.into_inner().query)
+        .map(|result| HttpResponse::Ok().json(result))
+        .unwrap_or_else(error_response)
 }
 
 /// `GET /media/{plugin_id}/enrich/{item_id}`
@@ -74,25 +66,12 @@ async fn enrich(
 ) -> impl Responder {
     let (plugin_id, item_id) = path.into_inner();
 
-    match media_service::enrich(&state.plugins, &plugin_id, &item_id) {
-        Ok(Some(detail)) => HttpResponse::Ok().json(detail),
-        Ok(None) => HttpResponse::NotFound().json(json!({ "error": "item not found" })),
-        Err(e) => error_response(e),
-    }
-}
-
-/// `GET /media/{plugin_id}/library/{library_item_id}/media`
-#[get("/{plugin_id}/library/{library_item_id}/media")]
-async fn media(
-    state: Data<AppState>,
-    path: Path<(String, String)>,
-) -> impl Responder {
-    let (plugin_id, library_item_id) = path.into_inner();
-
-    match media_service::media(&state.plugins, &plugin_id, &library_item_id) {
-        Ok(media) => HttpResponse::Ok().json(media),
-        Err(e) => error_response(e),
-    }
+    media_service::enrich(&state.plugins, &plugin_id, &item_id)
+        .map(|detail| match detail {
+            Some(d) => HttpResponse::Ok().json(d),
+            None => HttpResponse::NotFound().json(json!({ "error": "item not found" })),
+        })
+        .unwrap_or_else(error_response)
 }
 
 // ── Public ────────────────────────────────────────────────────────────────────
@@ -107,8 +86,6 @@ pub fn public_routes(cfg: &mut ServiceConfig) {
         scope("/media")
             .wrap(Governor::new(&governor_conf))
             .service(fetch)
-            .service(enrich)
-            .service(media),
+            .service(enrich),
     );
 }
-

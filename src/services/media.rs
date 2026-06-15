@@ -33,16 +33,3 @@ pub fn enrich(
 
     Ok((plugin.enrich)(item_id))
 }
-
-pub fn media(
-    registry: &PluginRegistry,
-    plugin_id: &str,
-    library_item_id: &str,
-) -> Result<Vec<Media>, PluginError> {
-    let plugin = registry
-        .get(plugin_id)
-        .ok_or(PluginError::NotFound)?;
-
-    Ok((plugin.media)(library_item_id))
-}
-

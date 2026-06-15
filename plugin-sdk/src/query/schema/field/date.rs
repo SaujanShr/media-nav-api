@@ -1,7 +1,7 @@
-use crate::query::partial_date::{DateGranularity, PartialDate};
+use crate::partial_date::PartialDate;
 
 pub struct DateFieldSchema {
-    pub granularity:   DateGranularity,
+    pub variant:       PartialDate,
     pub min:           Option<PartialDate>,
     pub max:           Option<PartialDate>,
     pub range:         bool,
@@ -12,18 +12,23 @@ pub struct DateFieldSchema {
 }
 
 impl DateFieldSchema {
+    
+    // ── Public ────────────────────────────────────────────────────────────────
+
     pub fn validate(&self, value: Option<(Option<PartialDate>, Option<PartialDate>)>) -> Result<(), String> {
         let (from, to) = value.unwrap_or((None, None));
 
         self.validate_required(from, to)?;
         self.validate_order(from, to)?;
         for date in [from, to].into_iter().flatten() {
-            self.validate_granularity(date)?;
+            self.validate_variant(date)?;
             self.validate_bounds(date)?;
         }
-        
+
         Ok(())
     }
+
+    // ── Private ───────────────────────────────────────────────────────────────
 
     fn validate_required(&self, from: Option<PartialDate>, to: Option<PartialDate>) -> Result<(), String> {
         if self.required_from && from.is_none() {
@@ -44,20 +49,13 @@ impl DateFieldSchema {
         Ok(())
     }
 
-    fn validate_granularity(&self, date: PartialDate) -> Result<(), String> {
-        match self.granularity {
-            DateGranularity::Year => {
-                if date.month.is_some() || date.day.is_some() {
-                    return Err("Only the year may be set for this field".into());
-                }
-            }
-            DateGranularity::Month => {
-                if date.day.is_some() {
-                    return Err("Only year and month may be set for this field".into());
-                }
-            }
-            DateGranularity::Day => {}
+    fn validate_variant(&self, date: PartialDate) -> Result<(), String> {
+        use std::mem::discriminant;
+
+        if discriminant(&self.variant) != discriminant(&date) {
+            return Err(format!("Date must match variant for this field"));
         }
+
         Ok(())
     }
 

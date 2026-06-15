@@ -2,6 +2,8 @@ use sqlx::{PgPool, Error, query, query_as};
 
 use crate::models::plugin::UserPlugin;
 
+// ── Public ────────────────────────────────────────────────────────────────────
+
 pub async fn find_by_id(pool: &PgPool, id: &str) -> Result<Option<UserPlugin>, Error> {
     query_as::<_, UserPlugin>("
         SELECT   id, user_id, plugin_id, last_accessed, enabled

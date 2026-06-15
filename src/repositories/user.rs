@@ -2,6 +2,8 @@ use sqlx::{PgPool, Error, query, query_as};
 
 use crate::models::user::{User, UserSettings};
 
+// ── Public ────────────────────────────────────────────────────────────────────
+
 pub async fn find_by_username(pool: &PgPool, username: &str) -> Result<Option<User>, Error> {
     query_as::<_, User>("
         SELECT   id, username, password_hash, created_at
@@ -54,4 +56,3 @@ pub async fn set_nsfw_enabled(pool: &PgPool, user_id: &str, nsfw_enabled: bool) 
         .fetch_one(pool)
         .await
 }
-

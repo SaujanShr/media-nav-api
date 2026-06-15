@@ -1,72 +1,58 @@
 # Providers
 
-This directory contains external provider servers that supply media data to the main API.
+Standalone HTTP servers that supply media data to plugins. Can be written in any language.
 
----
-
-## consumet
-
-A lightweight Express server that wraps the [consumet.ts](https://github.com/prince-ao/consumet.ts) library to expose anime episode listings and streaming source endpoints.
-
-### Dependencies
-
-| Tool | Min version |
-|------|-------------|
-| Node.js | 18+ |
-| npm | 9+ |
-| git | any recent |
-
-### Setup
-
-The `consumet.ts` library is **not bundled** in this repository. You must clone it before starting the server.
-
-Use the provided Makefile from this directory:
+## Setup
 
 ```sh
-# Clone consumet.ts and install all npm dependencies
+# Install all provider dependencies
 make setup
 
-# Start the consumet server (default port: 4000)
-make start-consumet
-
-# Or set a custom port
-PORT=5000 make start-consumet
+# Or individually
+make setup-example
 ```
 
-Alternatively, run the steps manually:
+## Running
 
 ```sh
-# 1. Clone consumet.ts into the expected location
-git clone https://github.com/consumet/consumet.ts providers/consumet/consumet.ts
+# Start example provider (port 4000)
+make start-example
 
-# 2. Install consumet.ts dependencies
-cd providers/consumet/consumet.ts && npm install && cd -
+# Custom port
+PORT=5000 make start-example
 
-# 3. Install server dependencies
-cd providers/consumet && npm install && cd -
+# Stop
+make stop-example
 
-# 4. Start the server
-cd providers/consumet && npm start
+# Clean dependencies
+make clean
 ```
 
-### Endpoints
+## Example Provider
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/anime/:malId/episodes` | Fetch episode list for an anime by MAL ID |
-| `GET` | `/episode/sources?episodeId=<id>` | Fetch streaming sources for an episode |
+Node.js/Express server serving dummy data from JSON fixtures. Template for new providers.
 
-### Environment Variables
+**Endpoints:**
+- `GET /items` - list media items (with pagination)
+- `GET /items/:id` - get item details
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `PORT` | `4000` | Port the consumet server listens on |
+**Environment:** `PORT` (default: 4000)
 
----
+## Creating a Provider
 
-## Adding a new provider
+1. **Create directory:** `providers/my-provider/`
+2. **Implement HTTP server** with endpoints plugins will call
+3. **Add Makefile targets:**
+   ```makefile
+   setup-my-provider:
+       cd my-provider && npm install
 
-1. Create a subdirectory under `providers/` (e.g. `providers/my-provider/`).
-2. Add a `setup` target and a `start-<name>` target to the root `providers/Makefile`.
-3. Document it in a new section above.
-
+   start-my-provider:
+       cd my-provider && PORT=$(PORT) npm start &
+   ```
+4. **Guidelines:**
+   - Stateless and horizontally scalable
+   - Return proper HTTP status codes
+   - Use consistent JSON response format
+   - Include test fixtures
+   - Document all endpoints

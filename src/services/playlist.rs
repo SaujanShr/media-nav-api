@@ -1,8 +1,10 @@
-use sqlx::{PgPool, Error::Database};
+use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::models::playlist::{Playlist, PlaylistItem};
 use crate::repositories::playlist as playlist_repo;
+use crate::validation::validate_playlist_name;
+use super::is_duplicate_key;
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
@@ -10,11 +12,11 @@ const INDEX_GAP_THRESHOLD: f64 = 1e-9;
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-#[derive(Debug)]
 pub enum PlaylistError {
     NotFound,
     Forbidden,
     AlreadyAdded,
+    ValidationError(String),
     Internal,
 }
 
@@ -46,18 +48,20 @@ async fn resolve_library_item(pool: &PgPool, user_library_item_id: &str, user_id
     Ok(())
 }
 
-fn is_duplicate_key(e: &sqlx::Error) -> bool {
-    matches!(e,
-        Database(db)
-        if db.code().as_deref() == Some("23505")
-    )
-}
-
 fn target_index(rest: &[f64], index: usize) -> f64 {
-    if rest.is_empty()       { return 0.0; }
-    if index == 0            { return rest[0] - 1.0; }
-    if index >= rest.len()   { return rest[rest.len() - 1] + 1.0; }
-    (rest[index - 1] + rest[index]) / 2.0
+    match (rest.is_empty(), index) {
+        (true, _) => 0.0,
+        (_, 0) => {
+            let new_index = rest[0] / 2.0;
+            if new_index < INDEX_GAP_THRESHOLD {
+                -1.0 // Signal normalization needed
+            } else {
+                new_index
+            }
+        }
+        (_, i) if i >= rest.len() => rest.last().unwrap() + 1.0,
+        (_, i) => (rest[i - 1] + rest[i]) / 2.0,
+    }
 }
 
 fn gap_too_small(rest: &[f64], index: usize, new_index: f64) -> bool {
@@ -95,6 +99,8 @@ pub async fn list(pool: &PgPool, user_id: &str) -> Result<Vec<Playlist>, Playlis
 }
 
 pub async fn create(pool: &PgPool, user_id: &str, name: &str) -> Result<Playlist, PlaylistError> {
+    validate_playlist_name(name).map_err(PlaylistError::ValidationError)?;
+
     let id = Uuid::new_v4().to_string();
 
     playlist_repo::create(pool, &id, user_id, name)
@@ -112,6 +118,7 @@ pub async fn delete(pool: &PgPool, user_id: &str, playlist_id: &str) -> Result<(
 }
 
 pub async fn rename(pool: &PgPool, user_id: &str, playlist_id: &str, name: &str) -> Result<Playlist, PlaylistError> {
+    validate_playlist_name(name).map_err(PlaylistError::ValidationError)?;
     resolve_playlist(pool, playlist_id, user_id).await?;
 
     playlist_repo::rename(pool, playlist_id, name)
@@ -181,7 +188,7 @@ pub async fn move_item(
     let rest_indices: Vec<f64>   = rest.iter().map(|i| i.index).collect();
 
     let new_index = target_index(&rest_indices, index);
-    let new_index = if gap_too_small(&rest_indices, index, new_index) {
+    let new_index = if new_index < 0.0 || gap_too_small(&rest_indices, index, new_index) {
         normalize(pool, &rest, index).await?
     } else {
         new_index

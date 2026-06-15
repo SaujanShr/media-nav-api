@@ -1,12 +1,12 @@
-use sqlx::{PgPool, Error::Database};
+use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::models::library_item::UserLibraryItem;
 use crate::repositories::{library_item as library_item_repo, plugin as plugin_repo};
+use super::is_duplicate_key;
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-#[derive(Debug)]
 pub enum LibraryItemError {
     PluginNotFound,
     Forbidden,
@@ -28,13 +28,6 @@ async fn resolve_plugin(pool: &PgPool, user_plugin_id: &str, user_id: &str) -> R
     }
 
     Ok(())
-}
-
-fn is_duplicate_key(e: &sqlx::Error) -> bool {
-    matches!(e,
-        Database(db)
-        if db.code().as_deref() == Some("23505")
-    )
 }
 
 // ── Public ────────────────────────────────────────────────────────────────────
@@ -66,7 +59,7 @@ pub async fn remove(pool: &PgPool, user_plugin_id: &str, user_id: &str, library_
         .await
         .map_err(|_| LibraryItemError::Internal)?;
     if !deleted {
-        return Err(LibraryItemError::Internal);
+        return Err(LibraryItemError::NotFound);
     }
 
     Ok(())

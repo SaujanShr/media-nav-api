@@ -1,31 +1,35 @@
 use serde::Serialize;
 
-#[derive(Serialize, Clone)]
-#[serde(rename_all = "UPPERCASE")]
+#[derive(Serialize)]
+#[serde(rename_all = "snake_case")]
 pub enum MediaType {
-    Text,
-    Video,
-    Audio,
     Image,
-    Gallery
+    Video
 }
 
-#[derive(Serialize, Clone)]
+#[derive(Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum CollectionType {
+    Comic
+}
+
+#[derive(Serialize)]
 pub struct MediaItem {
     pub media_type: MediaType,
-    pub title:      String,
+    pub title:      Option<String>,
     pub url:        String,
 }
 
-#[derive(Serialize, Clone)]
+#[derive(Serialize)]
 pub struct MediaCollection {
-    pub title: String,
+    pub collection_type: CollectionType,
+    pub title: Option<String>,
     pub items: Vec<Media>,
 }
 
-#[derive(Serialize, Clone)]
-#[serde(untagged)]
+#[derive(Serialize)]
+#[serde(rename_all = "snake_case")]
 pub enum Media {
-    Single(MediaItem),
+    Item(MediaItem),
     Collection(MediaCollection),
 }

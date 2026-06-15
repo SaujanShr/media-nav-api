@@ -39,24 +39,22 @@ async fn list(req: HttpRequest, state: Data<AppState>, path: Path<String>) -> im
     let user_plugin_id = path.into_inner();
     let user_id = assert_ok!(user_id(&req));
 
-    match library_item_service::list(&state.db, &user_plugin_id, &user_id).await {
-        Ok(items) => HttpResponse::Ok().json(items),
-        Err(e) => error_response(e),
-    }
+    library_item_service::list(&state.db, &user_plugin_id, &user_id)
+        .await
+        .map(|items| HttpResponse::Ok().json(items))
+        .unwrap_or_else(error_response)
 }
 
 /// `POST /api/library/{user_plugin_id}/items`
-///
-/// Body: `{ "library_item_id": "abc" }`
 #[post("/{user_plugin_id}/items")]
 async fn add(req: HttpRequest, state: Data<AppState>, path: Path<String>, body: Json<AddRequest>) -> impl Responder {
     let user_plugin_id = path.into_inner();
     let user_id = assert_ok!(user_id(&req));
 
-    match library_item_service::add(&state.db, &user_plugin_id, &user_id, &body.library_item_id).await {
-        Ok(item) => HttpResponse::Created().json(item),
-        Err(e) => error_response(e),
-    }
+    library_item_service::add(&state.db, &user_plugin_id, &user_id, &body.library_item_id)
+        .await
+        .map(|item| HttpResponse::Created().json(item))
+        .unwrap_or_else(error_response)
 }
 
 /// `DELETE /api/library/{user_plugin_id}/items/{library_item_id}`
@@ -65,10 +63,10 @@ async fn remove(req: HttpRequest, state: Data<AppState>, path: Path<(String, Str
     let (user_plugin_id, library_item_id) = path.into_inner();
     let user_id = assert_ok!(user_id(&req));
 
-    match library_item_service::remove(&state.db, &user_plugin_id, &user_id, &library_item_id).await {
-        Ok(()) => HttpResponse::NoContent().finish(),
-        Err(e) => error_response(e),
-    }
+    library_item_service::remove(&state.db, &user_plugin_id, &user_id, &library_item_id)
+        .await
+        .map(|_| HttpResponse::NoContent().finish())
+        .unwrap_or_else(error_response)
 }
 
 // ── Public ────────────────────────────────────────────────────────────────────

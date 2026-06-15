@@ -1,4 +1,4 @@
-use sqlx::{PgPool, Error::Database};
+use sqlx::PgPool;
 use uuid::Uuid;
 
 use plugin_sdk::plugin::Plugin;
@@ -6,23 +6,14 @@ use plugin_sdk::plugin::Plugin;
 use crate::models::plugin::UserPlugin;
 use crate::plugins::PluginRegistry;
 use crate::repositories::plugin as plugin_repo;
+use super::is_duplicate_key;
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-#[derive(Debug)]
 pub enum PluginError {
     AlreadyInstalled,
     NotFound,
     Internal,
-}
-
-// ── Private ───────────────────────────────────────────────────────────────────
-
-fn is_duplicate_key(e: &sqlx::Error) -> bool {
-    matches!(e,
-        Database(db)
-        if db.code().as_deref() == Some("23505")
-    )
 }
 
 // ── Public ────────────────────────────────────────────────────────────────────
@@ -57,7 +48,7 @@ pub async fn uninstall(pool: &PgPool, user_id: &str, plugin_id: &str) -> Result<
         .await
         .map_err(|_| PluginError::Internal)?;
     if !deleted {
-        return Err(PluginError::Internal);
+        return Err(PluginError::NotFound);
     }
 
     Ok(())

@@ -1,0 +1,17 @@
+[
+  {
+    "id": "example-item-1",
+    "title": "Example Item 1",
+    "thumbnail_url": "https://example.com/thumb1.png"
+  },
+  {
+    "id": "example-item-2",
+    "title": "Example Item 2",
+    "thumbnail_url": "https://example.com/thumb2.png"
+  },
+  {
+    "id": "example-item-3",
+    "title": "Example Item 3",
+    "thumbnail_url": "https://example.com/thumb3.png"
+  }
+]

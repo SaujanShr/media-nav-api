@@ -32,23 +32,21 @@ fn error_response(err: UserSettingsError) -> HttpResponse {
 async fn get_settings(state: Data<AppState>, req: HttpRequest) -> impl Responder {
     let claims = assert_ok!(extractor::claims(&req));
 
-    match user_settings_service::get(&state.db, &claims.sub).await {
-        Ok(settings) => HttpResponse::Ok().json(settings),
-        Err(e) => error_response(e),
-    }
+    user_settings_service::get(&state.db, &claims.sub)
+        .await
+        .map(|settings| HttpResponse::Ok().json(settings))
+        .unwrap_or_else(error_response)
 }
 
 /// `PUT /api/settings/nsfw`
-///
-/// Body: `{ "enabled": true }`
 #[put("/nsfw")]
 async fn set_nsfw(state: Data<AppState>, req: HttpRequest, body: Json<SetNsfwRequest>) -> impl Responder {
     let claims = assert_ok!(extractor::claims(&req));
 
-    match user_settings_service::set_nsfw_enabled(&state.db, &claims.sub, body.enabled).await {
-        Ok(settings) => HttpResponse::Ok().json(settings),
-        Err(e) => error_response(e),
-    }
+    user_settings_service::set_nsfw_enabled(&state.db, &claims.sub, body.enabled)
+        .await
+        .map(|settings| HttpResponse::Ok().json(settings))
+        .unwrap_or_else(error_response)
 }
 
 // ── Public ────────────────────────────────────────────────────────────────────

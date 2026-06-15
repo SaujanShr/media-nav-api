@@ -1,0 +1,15 @@
+{
+  "name": "example-provider",
+  "version": "1.0.0",
+  "description": "Example media provider server for media-nav",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": ["media", "provider", "example"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}

@@ -6,11 +6,11 @@ use serde::{Deserialize, Serialize};
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
-const TOKEN_EXPIRY_SECS: u64 = 24 * 60 * 60; // 24 hours
+const TOKEN_EXPIRY_SECS: u64 = 24 * 60 * 60;
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Claims {
     pub sub: String,
     pub iat: u64,

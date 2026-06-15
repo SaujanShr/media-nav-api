@@ -1,6 +1,5 @@
 use serde::Serialize;
 
-use crate::category::Category;
 use crate::library_item::{LibraryItem, LibraryItemDetail};
 use crate::media_item::Media;
 use crate::query::{Query, schema::QuerySchema};
@@ -17,15 +16,14 @@ pub struct FetchResult {
     pub total: u64,
 }
 
-#[derive(Serialize, Clone, Copy)]
+#[derive(Serialize)]
 pub struct PluginMetadata {
     pub name:        &'static str,
     pub description: &'static str,
-    pub category:    Category,
     pub nsfw:        bool,
 }
 
-#[derive(Serialize, Clone, Copy)]
+#[derive(Serialize)]
 pub struct PluginResources {
     pub icon_url:   &'static str,
     pub banner_url: &'static str,
@@ -45,10 +43,11 @@ pub struct PluginResources {
 ///         metadata:  PluginMetadata { ... },
 ///         resources: PluginResources { ... },
 ///         fetch:     my_fetch_fn,
+///         enrich:    my_enrich_fn,
 ///     }))
 /// }
 /// ```
-#[derive(Serialize, Clone, Copy)]
+#[derive(Serialize)]
 pub struct Plugin {
     pub id:        &'static str,
     pub version:   &'static str,
@@ -60,6 +59,4 @@ pub struct Plugin {
     pub fetch:     fn(FetchRequest) -> FetchResult,
     #[serde(skip)]
     pub enrich:    fn(&str) -> Option<LibraryItemDetail>,
-    #[serde(skip)]
-    pub media:     fn(&str) -> Vec<Media>,
 }

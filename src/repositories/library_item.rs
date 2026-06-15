@@ -2,6 +2,8 @@ use sqlx::{PgPool, Error, query, query_as};
 
 use crate::models::library_item::UserLibraryItem;
 
+// ── Public ────────────────────────────────────────────────────────────────────
+
 pub async fn list(pool: &PgPool, user_plugin_id: &str) -> Result<Vec<UserLibraryItem>, Error> {
     query_as::<_, UserLibraryItem>("
         SELECT   id, user_plugin_id, library_item_id, last_accessed

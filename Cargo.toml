@@ -1,11 +1,11 @@
 [workspace]
-members = [".", "plugin-sdk", "plugins/example", "plugins/anime"]
+members = [".", "plugin-sdk", "plugins/example"]
 resolver = "2"
 
 [package]
 name = "media-nav-api"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
 
 [dependencies]
 plugin-sdk = { path = "plugin-sdk" }
@@ -21,3 +21,6 @@ chrono = { version = "0.4", features = ["serde"] }
 dotenvy = "0.15"
 libloading = "0.9"
 actix-governor = "0.10"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+validator = { version = "0.20", features = ["derive"] }

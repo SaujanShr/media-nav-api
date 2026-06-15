@@ -2,10 +2,12 @@ use sqlx::{PgPool, Error, query, query_as, query_scalar};
 
 use crate::models::playlist::{Playlist, PlaylistItem};
 
+// ── Public ────────────────────────────────────────────────────────────────────
+
 pub async fn list(pool: &PgPool, user_id: &str) -> Result<Vec<Playlist>, Error> {
     query_as::<_, Playlist>("
         SELECT   id, user_id, name, created_at
-        FROM     playlists
+        FROM     user_playlists
         WHERE    user_id = $1
         ORDER BY created_at
         ")
@@ -17,7 +19,7 @@ pub async fn list(pool: &PgPool, user_id: &str) -> Result<Vec<Playlist>, Error> 
 pub async fn find_by_id(pool: &PgPool, id: &str) -> Result<Option<Playlist>, Error> {
     query_as::<_, Playlist>("
         SELECT id, user_id, name, created_at
-        FROM   playlists
+        FROM   user_playlists
         WHERE  id = $1
         ")
         .bind(id)
@@ -27,7 +29,7 @@ pub async fn find_by_id(pool: &PgPool, id: &str) -> Result<Option<Playlist>, Err
 
 pub async fn create(pool: &PgPool, id: &str, user_id: &str, name: &str) -> Result<Playlist, Error> {
     query_as::<_, Playlist>("
-        INSERT INTO playlists (id, user_id, name)
+        INSERT INTO user_playlists (id, user_id, name)
         VALUES ($1, $2, $3)
         RETURNING id, user_id, name, created_at
         ")
@@ -40,7 +42,7 @@ pub async fn create(pool: &PgPool, id: &str, user_id: &str, name: &str) -> Resul
 
 pub async fn delete(pool: &PgPool, id: &str) -> Result<bool, Error> {
     let result = query("
-        DELETE FROM playlists
+        DELETE FROM user_playlists
         WHERE  id = $1
         ")
         .bind(id)
@@ -52,7 +54,7 @@ pub async fn delete(pool: &PgPool, id: &str) -> Result<bool, Error> {
 
 pub async fn rename(pool: &PgPool, id: &str, name: &str) -> Result<Option<Playlist>, Error> {
     query_as::<_, Playlist>("
-        UPDATE playlists
+        UPDATE user_playlists
         SET    name = $2
         WHERE  id = $1
         RETURNING id, user_id, name, created_at
@@ -63,12 +65,10 @@ pub async fn rename(pool: &PgPool, id: &str, name: &str) -> Result<Option<Playli
         .await
 }
 
-// ── Items ─────────────────────────────────────────────────────────────────────
-
 pub async fn list_items(pool: &PgPool, playlist_id: &str) -> Result<Vec<PlaylistItem>, Error> {
     query_as::<_, PlaylistItem>("
         SELECT   id, playlist_id, user_library_item_id, index
-        FROM     playlist_items
+        FROM     user_playlist_items
         WHERE    playlist_id = $1
         ORDER BY index
         ")
@@ -96,17 +96,36 @@ pub async fn add_item(
     playlist_id: &str,
     user_library_item_id: &str,
 ) -> Result<PlaylistItem, Error> {
-    query_as::<_, PlaylistItem>("
-        INSERT INTO playlist_items (id, playlist_id, user_library_item_id, index)
-        VALUES ($1, $2, $3,
-            COALESCE((SELECT MAX(index) FROM playlist_items WHERE playlist_id = $2), -1.0) + 1.0)
+    let mut tx = pool.begin().await?;
+
+    query("SELECT 1 FROM user_playlists WHERE id = $1 FOR UPDATE")
+        .bind(playlist_id)
+        .execute(&mut *tx)
+        .await?;
+
+    let max_index: Option<f64> = query_scalar(
+        "SELECT MAX(index) FROM user_playlist_items WHERE playlist_id = $1"
+    )
+        .bind(playlist_id)
+        .fetch_optional(&mut *tx)
+        .await?;
+
+    let new_index = max_index.unwrap_or(-1.0) + 1.0;
+
+    let item = query_as::<_, PlaylistItem>("
+        INSERT INTO user_playlist_items (id, playlist_id, user_library_item_id, index)
+        VALUES ($1, $2, $3, $4)
         RETURNING id, playlist_id, user_library_item_id, index
         ")
         .bind(id)
         .bind(playlist_id)
         .bind(user_library_item_id)
-        .fetch_one(pool)
-        .await
+        .bind(new_index)
+        .fetch_one(&mut *tx)
+        .await?;
+
+    tx.commit().await?;
+    Ok(item)
 }
 
 pub async fn remove_item(
@@ -115,7 +134,7 @@ pub async fn remove_item(
     user_library_item_id: &str,
 ) -> Result<bool, Error> {
     let result = query("
-        DELETE FROM playlist_items
+        DELETE FROM user_playlist_items
         WHERE  playlist_id = $1
         AND    user_library_item_id = $2
         ")
@@ -133,7 +152,7 @@ pub async fn update_item_index(
     index: f64,
 ) -> Result<Option<PlaylistItem>, Error> {
     query_as::<_, PlaylistItem>("
-        UPDATE playlist_items
+        UPDATE user_playlist_items
         SET    index = $2
         WHERE  id = $1
         RETURNING id, playlist_id, user_library_item_id, index
@@ -146,11 +165,28 @@ pub async fn update_item_index(
 
 /// Bulk-updates `(item_id, new_index)` pairs in a single transaction.
 /// Used during re-normalization when float gaps get too small.
+/// Locks the playlist to prevent concurrent modifications.
 pub async fn set_item_indices(pool: &PgPool, updates: Vec<(String, f64)>) -> Result<(), Error> {
+    if updates.is_empty() {
+        return Ok(());
+    }
+
     let mut tx = pool.begin().await?;
 
+    let playlist_id: String = query_scalar(
+        "SELECT playlist_id FROM user_playlist_items WHERE id = $1"
+    )
+        .bind(&updates[0].0)
+        .fetch_one(&mut *tx)
+        .await?;
+
+    query("SELECT 1 FROM user_playlists WHERE id = $1 FOR UPDATE")
+        .bind(&playlist_id)
+        .execute(&mut *tx)
+        .await?;
+
     for (id, index) in updates {
-        query("UPDATE playlist_items SET index = $2 WHERE id = $1")
+        query("UPDATE user_playlist_items SET index = $2 WHERE id = $1")
             .bind(id)
             .bind(index)
             .execute(&mut *tx)
@@ -159,4 +195,3 @@ pub async fn set_item_indices(pool: &PgPool, updates: Vec<(String, f64)>) -> Res
 
     tx.commit().await
 }
-

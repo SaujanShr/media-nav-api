@@ -1,0 +1,128 @@
+{
+  "example-item-1": {
+    "id": "example-item-1",
+    "version": "1.0",
+    "metadata": {
+      "title": "Example Item 1",
+      "subtitle": "A fascinating example",
+      "summary": "This is a detailed summary of Example Item 1. It demonstrates how media items can have rich metadata including descriptions, attributes, and various media resources.",
+      "attributes": [
+        {
+          "label": "Genre",
+          "value": "Example"
+        },
+        {
+          "label": "Year",
+          "value": "2024"
+        },
+        {
+          "label": "Rating",
+          "value": "5.0"
+        }
+      ]
+    },
+    "resources": {
+      "thumbnail": "https://example.com/thumb1.png",
+      "preview": [
+        {
+          "media_type": "image",
+          "title": "Preview Image 1",
+          "url": "https://example.com/preview1.png"
+        },
+        {
+          "media_type": "image",
+          "title": "Preview Image 2",
+          "url": "https://example.com/preview2.png"
+        }
+      ],
+      "media": {
+        "item": {
+          "media_type": "video",
+          "title": "Example Video",
+          "url": "https://example.com/video1.mp4"
+        }
+      }
+    }
+  },
+  "example-item-2": {
+    "id": "example-item-2",
+    "version": "1.0",
+    "metadata": {
+      "title": "Example Item 2",
+      "subtitle": "Another great example",
+      "summary": "This is a detailed summary of Example Item 2. It showcases different types of media and metadata structures.",
+      "attributes": [
+        {
+          "label": "Genre",
+          "value": "Demo"
+        },
+        {
+          "label": "Year",
+          "value": "2024"
+        },
+        {
+          "label": "Rating",
+          "value": "4.8"
+        }
+      ]
+    },
+    "resources": {
+      "thumbnail": "https://example.com/thumb2.png",
+      "preview": [
+        {
+          "media_type": "image",
+          "title": "Preview Image 1",
+          "url": "https://example.com/preview3.png"
+        }
+      ],
+      "media": {
+        "collection": {
+          "collection_type": "playlist",
+          "title": "Example Collection",
+          "items": [
+            {
+              "item": {
+                "media_type": "video",
+                "title": "Video 1",
+                "url": "https://example.com/video2-1.mp4"
+              }
+            },
+            {
+              "item": {
+                "media_type": "video",
+                "title": "Video 2",
+                "url": "https://example.com/video2-2.mp4"
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "example-item-3": {
+    "id": "example-item-3",
+    "version": "1.0",
+    "metadata": {
+      "title": "Example Item 3",
+      "subtitle": null,
+      "summary": null,
+      "attributes": [
+        {
+          "label": "Type",
+          "value": "Minimal Example"
+        }
+      ]
+    },
+    "resources": {
+      "thumbnail": "https://example.com/thumb3.png",
+      "preview": [],
+      "media": {
+        "item": {
+          "media_type": "audio",
+          "title": "Example Audio",
+          "url": "https://example.com/audio.mp3"
+        }
+      }
+    }
+  }
+}

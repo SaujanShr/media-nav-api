@@ -1,74 +1,45 @@
 # media-nav-api
 
-A self-hosted media navigation API backed by a plugin system and external provider servers.
+Self-hosted media navigation API with plugin system and external provider servers.
 
----
+## Quick Start
 
-## Prerequisites
-
-| Tool | Purpose |
-|------|---------|
-| Rust / Cargo | Build the API server and plugins |
-| Node.js 18+ & npm 9+ | Run provider servers |
-| git | Clone provider libraries |
-
----
-
-## Quick start
+**Prerequisites:** Rust/Cargo, Node.js 18+, PostgreSQL
 
 ```sh
-# 1. Set up providers (clone libs, install deps) — one-time step
+# 1. Configure environment
+cp .env.example .env
+# Edit .env: set DATABASE_URL, JWT_SECRET (32+ chars), PLUGINS_DIR, HOST, PORT
+
+# 2. Set up and start providers
 make -C providers setup
+make -C providers start-example    # runs on port 4000
 
-# 2. Start providers
-make -C providers start-consumet        # runs on port 4000 by default
-# PORT=5000 make -C providers start-consumet   # custom port
-
-# 3. Build and run the API server
+# 3. Build and run API
 make run
 ```
 
----
-
-## Providers
-
-Provider servers live under `providers/`. They are **not** managed by the root Makefile — use the dedicated `providers/Makefile` for full control.
-
-See [`providers/README.md`](providers/README.md) for detailed setup instructions.
-
-### Common provider commands
+## Commands
 
 ```sh
-# First-time setup (clone external libs + npm install)
-make -C providers setup
-
-# Start the consumet provider server
-make -C providers start-consumet
-
-# Update consumet.ts to the latest upstream version
-make -C providers update-consumet
-
-# Stop consumet (kill by PID file)
-make -C providers stop-consumet
-
-# Remove cloned libs and node_modules
-make -C providers clean
-```
-
----
-
-## API server
-
-```sh
+# API server
+make run              # build, install plugins, start server
 make build            # compile server + plugins
-make build-plugins    # compile plugins only
-make install-plugins  # copy + codesign plugins into plugins/
-make run              # build, install plugins, then start the server
-make clean            # remove build artefacts and installed plugins
+make build-plugins    # plugins only
+make install-plugins  # copy plugins to plugins/ dir
+make clean            # remove build artifacts
+
+# Providers (see providers/README.md)
+make -C providers setup          # install dependencies
+make -C providers start-example  # start example provider
+make -C providers stop-example   # stop example provider
+
+# Optional: enable debug logging
+export RUST_LOG=media_nav_api=debug,actix_web=info
 ```
 
----
+## Contributing
 
-## Plugins
+**Add a plugin:** Create a Cargo workspace member under `plugins/` following the `example` plugin structure. See [plugins/README.md](plugins/README.md).
 
-Compiled plugin dylibs are placed in `plugins/` by `make install-plugins`. To add a new plugin create a new Cargo workspace member under `plugins/` and follow the existing `example` or `anime` plugin structure.
+**Add a provider:** Create a subdirectory under `providers/` with HTTP endpoints. Add targets to `providers/Makefile`. See [providers/README.md](providers/README.md).

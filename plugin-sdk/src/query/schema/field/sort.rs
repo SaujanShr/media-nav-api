@@ -7,12 +7,17 @@ pub struct SortFieldSchema {
 }
 
 impl SortFieldSchema {
+
+    // ── Public ────────────────────────────────────────────────────────────────
+
     pub fn validate(&self, value: Option<&SortExpression>) -> Result<(), String> {
         if let Some(expr) = value {
             self.validate_sort(expr)?;
         }
         Ok(())
     }
+
+    // ── Private ───────────────────────────────────────────────────────────────
 
     fn validate_sort(&self, expr: &SortExpression) -> Result<(), String> {
         let option = self.supported.iter()

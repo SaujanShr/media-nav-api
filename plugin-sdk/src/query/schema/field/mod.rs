@@ -11,4 +11,3 @@ pub use filter::FilterFieldSchema;
 pub use number::NumberFieldSchema;
 pub use search::SearchFieldSchema;
 pub use sort::SortFieldSchema;
-

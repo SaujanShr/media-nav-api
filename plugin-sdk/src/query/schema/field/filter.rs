@@ -12,12 +12,17 @@ pub struct FilterFieldSchema {
 }
 
 impl FilterFieldSchema {
+
+    // ── Public ────────────────────────────────────────────────────────────────
+
     pub fn validate(&self, value: Option<&FilterExpression>) -> Result<(), String> {
         match value {
             None => Ok(()),
             Some(expr) => self.validate_filter(expr),
         }
     }
+
+    // ── Private ───────────────────────────────────────────────────────────────
 
     fn validate_filter(&self, expr: &FilterExpression) -> Result<(), String> {
         let all: HashSet<&String> = expr.include.union(&expr.exclude).collect();

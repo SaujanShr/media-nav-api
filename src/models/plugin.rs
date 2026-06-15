@@ -7,6 +7,7 @@ pub struct UserPlugin {
     pub id: String,
     pub user_id: String,
     pub plugin_id: String,
+    pub version: String,
     pub last_accessed: DateTime<Utc>,
     pub enabled: bool,
 }

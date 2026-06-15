@@ -1,12 +1,10 @@
-CONSUMET_DIR  := consumet
-CONSUMET_LIB  := $(CONSUMET_DIR)/consumet.ts
-CONSUMET_REPO := https://github.com/prince-ao/consumet.ts
-CONSUMET_PID  := .consumet.pid
-CONSUMET_LOG  := /tmp/consumet.log
-NPM           := npm --registry https://registry.npmjs.org
+EXAMPLE_DIR  := example
+EXAMPLE_PID  := .example.pid
+EXAMPLE_LOG  := /tmp/example-provider.log
+NPM          := npm --registry https://registry.npmjs.org
 
-.PHONY: help setup setup-consumet clone-consumet install-consumet install-server \
-        start-consumet stop-consumet update-consumet clean-consumet clean
+.PHONY: help setup setup-example install-example \
+        start-example stop-example clean-example clean
 
 help: ## Show this help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -14,58 +12,40 @@ help: ## Show this help message
 
 # ── Setup ──────────────────────────────────────────────────────────────────────
 
-setup: setup-consumet ## Set up all providers
+setup: setup-example ## Set up all providers
 
-setup-consumet: clone-consumet install-consumet install-server ## Clone consumet.ts and install all dependencies
+setup-example: install-example ## Install example provider dependencies
 
-clone-consumet: ## Clone the consumet.ts library (skipped if already present)
-	@if [ ! -d "$(CONSUMET_LIB)" ]; then \
-		echo "→ Cloning consumet.ts..."; \
-		git clone $(CONSUMET_REPO) $(CONSUMET_LIB); \
-	else \
-		echo "→ consumet.ts already cloned, skipping."; \
-	fi
-
-install-consumet: ## Install consumet.ts npm dependencies
-	@echo "→ Installing consumet.ts dependencies..."
-	cd $(CONSUMET_LIB) && $(NPM) install
-
-install-server: ## Install consumet server npm dependencies
-	@echo "→ Installing consumet server dependencies..."
-	cd $(CONSUMET_DIR) && $(NPM) install
+install-example: ## Install example provider npm dependencies
+	@echo "→ Installing example provider dependencies..."
+	cd $(EXAMPLE_DIR) && $(NPM) install
 
 # ── Run ────────────────────────────────────────────────────────────────────────
 
-start-consumet: ## Start the consumet provider server in the background (PORT=4000 by default)
-	@if [ -f $(CONSUMET_PID) ] && kill -0 $$(cat $(CONSUMET_PID)) 2>/dev/null; then \
-		echo "→ consumet already running (pid $$(cat $(CONSUMET_PID)))"; \
+start-example: ## Start the example provider server in the background (PORT=4000 by default)
+	@if [ -f $(EXAMPLE_PID) ] && kill -0 $$(cat $(EXAMPLE_PID)) 2>/dev/null; then \
+		echo "→ example provider already running (pid $$(cat $(EXAMPLE_PID)))"; \
 	else \
-		echo "→ Starting consumet server on port $(PORT) (log: $(CONSUMET_LOG))..."; \
-		cd $(CONSUMET_DIR) && PORT=$(PORT) $(NPM) start > $(CONSUMET_LOG) 2>&1 & \
-		echo $$! > ../$(CONSUMET_PID); \
-		echo "→ consumet started (pid $$(cat ../$(CONSUMET_PID)))"; \
+		echo "→ Starting example provider on port $${PORT:-4000} (log: $(EXAMPLE_LOG))..."; \
+		cd $(EXAMPLE_DIR) && PORT=$${PORT:-4000} $(NPM) start > $(EXAMPLE_LOG) 2>&1 & \
+		echo $$! > ../$(EXAMPLE_PID); \
+		echo "→ example provider started (pid $$(cat ../$(EXAMPLE_PID)))"; \
 	fi
 
-stop-consumet: ## Stop the consumet provider server
-	@if [ -f $(CONSUMET_PID) ] && kill -0 $$(cat $(CONSUMET_PID)) 2>/dev/null; then \
-		kill $$(cat $(CONSUMET_PID)) && echo "→ consumet stopped"; \
-		rm -f $(CONSUMET_PID); \
+stop-example: ## Stop the example provider server
+	@if [ -f $(EXAMPLE_PID) ] && kill -0 $$(cat $(EXAMPLE_PID)) 2>/dev/null; then \
+		kill $$(cat $(EXAMPLE_PID)) && echo "→ example provider stopped"; \
+		rm -f $(EXAMPLE_PID); \
 	else \
-		echo "→ consumet is not running"; \
-		rm -f $(CONSUMET_PID); \
+		echo "→ example provider is not running"; \
+		rm -f $(EXAMPLE_PID); \
 	fi
 
 # ── Maintenance ────────────────────────────────────────────────────────────────
 
-update-consumet: ## Pull the latest consumet.ts changes
-	@echo "→ Updating consumet.ts..."
-	cd $(CONSUMET_LIB) && git pull
-	cd $(CONSUMET_LIB) && $(NPM) install
+clean-example: ## Remove example provider node_modules
+	@echo "→ Cleaning example provider..."
+	rm -rf $(EXAMPLE_DIR)/node_modules
+	rm -f $(EXAMPLE_PID)
 
-clean-consumet: ## Remove cloned consumet.ts and node_modules
-	@echo "→ Cleaning consumet..."
-	rm -rf $(CONSUMET_LIB)
-	rm -rf $(CONSUMET_DIR)/node_modules
-
-clean: clean-consumet ## Remove all generated/cloned artifacts
-
+clean: clean-example ## Remove all generated artifacts

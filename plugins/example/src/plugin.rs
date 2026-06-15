@@ -1,7 +1,6 @@
-use plugin_sdk::category::Category;
 use plugin_sdk::plugin::{Plugin, PluginMetadata, PluginResources};
 
-use crate::{enrich, fetch, media, schema};
+use crate::{enrich, fetch, schema};
 
 pub const PLUGIN: Plugin = Plugin {
     id:      "example",
@@ -9,7 +8,6 @@ pub const PLUGIN: Plugin = Plugin {
     metadata: PluginMetadata {
         name:        "Example Plugin",
         description: "A minimal example plugin for media-nav.",
-        category:    Category::Unknown,
         nsfw:        false,
     },
     resources: PluginResources {
@@ -19,6 +17,5 @@ pub const PLUGIN: Plugin = Plugin {
     schema:    schema::schema,
     fetch:     fetch::fetch,
     enrich:    enrich::enrich,
-    media:     media::media,
 };
 

@@ -45,23 +45,21 @@ async fn list_all(state: Data<AppState>) -> impl Responder {
 async fn list(req: HttpRequest, state: Data<AppState>) -> impl Responder {
     let user_id = assert_ok!(user_id(&req));
 
-    match plugin_service::list(&state.db, &user_id).await {
-        Ok(plugins) => HttpResponse::Ok().json(plugins),
-        Err(e) => error_response(e),
-    }
+    plugin_service::list(&state.db, &user_id)
+        .await
+        .map(|plugins| HttpResponse::Ok().json(plugins))
+        .unwrap_or_else(error_response)
 }
 
 /// `POST /api/plugins`
-///
-/// Body: `{ "plugin_id": "abc" }`
 #[post("")]
 async fn install(req: HttpRequest, state: Data<AppState>, body: Json<InstallRequest>) -> impl Responder {
     let user_id = assert_ok!(user_id(&req));
 
-    match plugin_service::install(&state.db, &user_id, &body.plugin_id).await {
-        Ok(plugin) => HttpResponse::Created().json(plugin),
-        Err(e) => error_response(e),
-    }
+    plugin_service::install(&state.db, &user_id, &body.plugin_id)
+        .await
+        .map(|plugin| HttpResponse::Created().json(plugin))
+        .unwrap_or_else(error_response)
 }
 
 /// `DELETE /api/plugins/{plugin_id}`
@@ -70,24 +68,22 @@ async fn uninstall(req: HttpRequest, state: Data<AppState>, path: Path<String>) 
     let plugin_id = path.into_inner();
     let user_id = assert_ok!(user_id(&req));
 
-    match plugin_service::uninstall(&state.db, &user_id, &plugin_id).await {
-        Ok(()) => HttpResponse::NoContent().finish(),
-        Err(e) => error_response(e),
-    }
+    plugin_service::uninstall(&state.db, &user_id, &plugin_id)
+        .await
+        .map(|_| HttpResponse::NoContent().finish())
+        .unwrap_or_else(error_response)
 }
 
 /// `PATCH /api/plugins/{plugin_id}`
-///
-/// Body: `{ "enabled": true }`
 #[patch("/{plugin_id}")]
 async fn set_enabled(req: HttpRequest, state: Data<AppState>, path: Path<String>, body: Json<SetEnabledRequest>) -> impl Responder {
     let plugin_id = path.into_inner();
     let user_id = assert_ok!(user_id(&req));
 
-    match plugin_service::set_enabled(&state.db, &user_id, &plugin_id, body.enabled).await {
-        Ok(plugin) => HttpResponse::Ok().json(plugin),
-        Err(e) => error_response(e),
-    }
+    plugin_service::set_enabled(&state.db, &user_id, &plugin_id, body.enabled)
+        .await
+        .map(|plugin| HttpResponse::Ok().json(plugin))
+        .unwrap_or_else(error_response)
 }
 
 // ── Public ────────────────────────────────────────────────────────────────────

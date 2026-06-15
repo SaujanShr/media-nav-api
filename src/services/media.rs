@@ -1,5 +1,4 @@
 use plugin_sdk::library_item::LibraryItemDetail;
-use plugin_sdk::media_item::Media;
 use plugin_sdk::plugin::{FetchRequest, FetchResult};
 use plugin_sdk::query::Query;
 

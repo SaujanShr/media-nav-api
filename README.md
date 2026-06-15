@@ -2,40 +2,169 @@
 
 Self-hosted media navigation API with plugin system and external provider servers.
 
+> **New to the project?** Check out [SETUP.md](SETUP.md) for detailed installation instructions, troubleshooting, and development workflow.
+
 ## Quick Start
 
-**Prerequisites:** Rust/Cargo, Node.js 18+, PostgreSQL
+**Prerequisites:** Rust/Cargo, Node.js 18+, Docker
 
 ```sh
-# 1. Configure environment
+# 1. Clone and configure
+git clone <repo-url>
+cd media-nav-api
 cp .env.example .env
-# Edit .env: set DATABASE_URL, JWT_SECRET (32+ chars), PLUGINS_DIR, HOST, PORT
 
-# 2. Set up and start providers
-make -C providers setup
-make -C providers start-example    # runs on port 4000
+# 2. Update JWT_SECRET in .env (required)
+# Generate with: openssl rand -base64 32
 
-# 3. Build and run API
+# 3. Build and run everything
 make run
 ```
 
-## Commands
+The server starts at `http://localhost:8080`. 
+
+**Detailed setup instructions:** See [SETUP.md](SETUP.md) for troubleshooting, custom credentials, and more.
+
+### Custom Database Credentials
+
+The default Docker setup uses `user`/`password` credentials. To use your own:
+
+1. Create a `docker-compose.override.yml` file (gitignored):
+   ```yaml
+   services:
+     postgres:
+       environment:
+         POSTGRES_USER: your_username
+         POSTGRES_PASSWORD: your_password
+   ```
+
+2. Update `.env` to match:
+   ```sh
+   DATABASE_URL=postgresql://your_username:your_password@localhost:5433/media_nav_db
+   ```
+
+3. Start fresh (if the database was already running):
+   ```sh
+   make db-reset
+   ```
+
+Docker Compose automatically merges `docker-compose.override.yml` with `docker-compose.yml`, keeping your credentials local.
+
+## Architecture
+
+- **Server:** Rust/Actix-Web API with PostgreSQL database
+- **Plugins:** Dynamic Rust libraries that extend content sources ([plugins/README.md](plugins/README.md))
+- **Providers:** Standalone HTTP servers supplying media data ([providers/README.md](providers/README.md))
+- **Database:** PostgreSQL 16 in Docker (port 5433 by default to avoid conflicts)
+
+## Demo
+
+Once everything is running, try the demo script:
 
 ```sh
-# API server
-make run              # build, install plugins, start server
-make build            # compile server + plugins
-make build-plugins    # plugins only
-make install-plugins  # copy plugins to plugins/ dir
-make clean            # remove build artifacts
+# In another terminal (with server running)
+./demo.sh
+```
 
-# Providers (see providers/README.md)
-make -C providers setup          # install dependencies
-make -C providers start-example  # start example provider
-make -C providers stop-example   # stop example provider
+This demonstrates the full flow: register → login → fetch → enrich → get media.
+
+## Commands
+
+### Full Stack
+
+```sh
+make run              # build all, start database & providers, run server
+make build            # build plugins, providers, and server
+make setup            # install all dependencies
+make start            # start database and providers (without building)
+make stop             # stop database and providers
+make clean            # remove all build artifacts and dependencies
+make logs             # show logs from database and providers
+make help             # show all available targets with descriptions
+```
+
+### Database
+
+```sh
+make db-start         # start PostgreSQL in Docker (port 5433)
+make db-stop          # stop database
+make db-reset         # wipe and restart database (destructive)
+make db-logs          # follow database logs
+make db-shell         # open psql shell to media_nav_db
+make db-clean         # remove container and volumes (destructive)
+```
+
+**Note:** Port 5433 is used by default to avoid conflicts with existing PostgreSQL installations on port 5432.
+
+### Plugins
+
+```sh
+make build-plugins    # build and install all plugin dylibs
+make clean-plugins    # remove installed plugins
+# Or use plugins/Makefile directly for finer control
+```
+
+### Providers
+
+```sh
+make setup-providers    # install provider dependencies
+make start-providers    # start provider servers in background
+make stop-providers     # stop provider servers
+make clean-providers    # remove provider artifacts
+# Or use providers/Makefile directly for finer control
+```
+
+### Server
+
+```sh
+make build-server     # build the main Rust server
+make clean-server     # remove Rust build artifacts
+cargo run             # run server directly (assumes db/providers are running)
 
 # Optional: enable debug logging
 export RUST_LOG=media_nav_api=debug,actix_web=info
+```
+
+## Troubleshooting
+
+### Port 5432 already in use
+
+If you see "Bind for 0.0.0.0:5432 failed: port is already allocated", you already have PostgreSQL running. Options:
+
+1. **Use the Docker setup on port 5433** (default): The setup automatically uses port 5433 to avoid conflicts
+2. **Use your existing PostgreSQL**: Update `.env` to point to your existing database and skip `make db-start`
+
+### Database connection errors
+
+If the server can't connect to the database:
+
+```sh
+# Check database is running
+docker compose ps postgres
+
+# Check connection manually
+make db-shell
+
+# View database logs
+make db-logs
+
+# Reset everything (destructive)
+make db-reset
+```
+
+### Provider not running
+
+If the demo script reports providers aren't running:
+
+```sh
+# Check provider status
+lsof -ti :4000
+
+# View provider logs
+tail -f /tmp/example-provider.log
+
+# Restart providers
+make stop-providers && make start-providers
 ```
 
 ## Contributing

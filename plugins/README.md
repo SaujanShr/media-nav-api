@@ -6,8 +6,17 @@ Dynamically-loaded Rust libraries that extend the API with new content sources. 
 
 ```sh
 # From repository root
-make build-plugins      # compile all plugins
-make install-plugins    # copy to plugins/ directory
+make build-plugins      # compile and install all plugins
+
+# Or from plugins/ directory
+cd plugins
+make build              # compile all plugin dylibs
+make install            # copy to plugins/ and sign
+make clean              # remove installed plugins
+
+# Individual plugin
+make build-example
+make install-example
 ```
 
 ## Creating a Plugin
@@ -60,9 +69,11 @@ make install-plugins    # copy to plugins/ directory
    }
    ```
 
-5. **Build and test:**
+5. **Update `plugins/Makefile`** to include your new plugin targets (follow the example pattern).
+
+6. **Build and test:**
    ```sh
-   make build-plugins && make install-plugins
+   make build-plugins    # from repository root
    # Restart API server to load new plugin
    ```
 

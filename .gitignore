@@ -25,3 +25,13 @@ target
 
 # Environment variables file
 .env
+
+# Local Docker Compose overrides
+docker-compose.override.yml
+
+# Provider process tracking
+.example.pid
+*.pid
+
+# Provider logs
+/tmp/*-provider.log

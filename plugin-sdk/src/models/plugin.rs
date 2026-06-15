@@ -1,7 +1,6 @@
 use serde::Serialize;
 
 use crate::library_item::{LibraryItem, LibraryItemDetail};
-use crate::media_item::Media;
 use crate::query::{Query, schema::QuerySchema};
 
 pub struct FetchRequest {

@@ -116,10 +116,11 @@ make run
 This single command:
 1. Builds all plugins and installs them
 2. Installs provider dependencies
-3. Starts PostgreSQL database in Docker
+3. Starts PostgreSQL database in Docker (empty database)
 4. Starts provider servers in the background
-5. Runs database migrations
-6. Starts the API server
+5. Starts the API server (which runs migrations automatically on startup)
+
+**Note:** Database migrations are managed by sqlx and run automatically when the server starts.
 
 The server will be available at `http://localhost:8080`.
 
@@ -303,20 +304,27 @@ cat .env | grep PLUGINS_DIR
 
 ### Migrations Failed
 
-**Problem:** Database migrations don't run
+**Problem:** Database migrations don't run or fail with "already exists" errors
 
 **Solutions:**
 ```sh
 # 1. Check migration files exist
 ls -la migrations/
 
-# 2. Manually run migrations (if server isn't running)
-docker compose exec postgres psql -U <user> -d media_nav_db -f /docker-entrypoint-initdb.d/0001_create_users.sql
+# 2. Check sqlx migration tracking table
+make db-shell
+SELECT * FROM _sqlx_migrations;
+\q
 
 # 3. Reset database and let migrations run fresh
 make db-reset
-make run
+cargo run  # migrations run automatically on server startup
+
+# 4. If migrations are partially applied, reset is the safest option
+make db-reset
 ```
+
+**Note:** Migrations are managed by sqlx and run automatically when the Rust server starts. The `_sqlx_migrations` table tracks which migrations have been applied.
 
 ## Next Steps
 

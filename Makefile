@@ -14,7 +14,13 @@ help: ## Show this help message
 
 run: build db-start start-providers ## Build everything, start database and providers, then run server
 	@echo "→ Waiting for database to be ready..."
-	@until docker compose exec -T postgres pg_isready -U user -d media_nav_db > /dev/null 2>&1; do sleep 1; done
+	@for i in $$(seq 1 30); do \
+		if docker compose exec -T postgres pg_isready > /dev/null 2>&1; then \
+			echo "→ Database ready"; \
+			break; \
+		fi; \
+		sleep 1; \
+	done
 	$(CARGO) run --package media-nav-api
 
 build: build-plugins build-providers build-server ## Build plugins, providers, and server
@@ -76,8 +82,13 @@ db-start: ## Start PostgreSQL database in Docker
 		echo "→ Starting PostgreSQL database..."; \
 		docker compose up -d postgres; \
 		echo "→ Waiting for database to be ready..."; \
-		until docker compose exec -T postgres pg_isready -U user -d media_nav_db > /dev/null 2>&1; do sleep 1; done; \
-		echo "→ Database ready"; \
+		for i in $$(seq 1 30); do \
+			if docker compose exec -T postgres pg_isready > /dev/null 2>&1; then \
+				echo "→ Database ready"; \
+				break; \
+			fi; \
+			sleep 1; \
+		done; \
 	fi
 
 db-stop: ## Stop PostgreSQL database

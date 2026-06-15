@@ -68,3 +68,15 @@ pub async fn update_settings(pool: &PgPool, user_id: &str, nsfw_enabled: bool, t
         .fetch_one(pool)
         .await
 }
+
+pub async fn delete(pool: &PgPool, user_id: &str) -> Result<bool, Error> {
+    let result = query("
+        DELETE FROM users
+        WHERE  id = $1
+        ")
+        .bind(user_id)
+        .execute(pool)
+        .await?;
+
+    Ok(result.rows_affected() > 0)
+}

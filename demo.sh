@@ -51,16 +51,27 @@ echo "$REGISTER" | jq .
 TOKEN=$(echo "$REGISTER" | jq -r '.token')
 AUTH="Authorization: Bearer $TOKEN"
 
-# ── 4. Get current user info ──────────────────────────────────────────────────
-echo_step "4. Get current user info (/api/auth/me)"
-curl -sf "$BASE/api/auth/me" -H "$AUTH" | jq .
+# ── 4. Login with same credentials ────────────────────────────────────────────
+echo_step "4. Login with existing user"
+LOGIN=$(curl -sf -X POST "$BASE/auth/login" \
+  -H "Content-Type: application/json" \
+  -d "{\"username\":\"$USER\",\"password\":\"$PASS\"}")
+echo "$LOGIN" | jq .
 
-# ── 5. List installed plugins (should be empty) ───────────────────────────────
-echo_step "5. List installed plugins (should be empty)"
+# Verify we got a valid token from login
+LOGIN_TOKEN=$(echo "$LOGIN" | jq -r '.token')
+echo "  → Login token matches register token: $([ "$TOKEN" != "$LOGIN_TOKEN" ] && echo "false (different tokens)" || echo "true")"
+
+# ── 5. Get current user info ──────────────────────────────────────────────────
+echo_step "5. Get current user info (/api/account)"
+curl -sf "$BASE/api/account" -H "$AUTH" | jq .
+
+# ── 6. List installed plugins (should be empty) ───────────────────────────────
+echo_step "6. List installed plugins (should be empty)"
 curl -sf "$BASE/api/plugins" -H "$AUTH" | jq .
 
-# ── 6. Install a plugin ───────────────────────────────────────────────────────
-echo_step "6. Install plugin: $PLUGIN"
+# ── 7. Install a plugin ───────────────────────────────────────────────────────
+echo_step "7. Install plugin: $PLUGIN"
 PLUGIN_INSTALL=$(curl -sf -X POST "$BASE/api/plugins" \
   -H "Content-Type: application/json" \
   -H "$AUTH" \
@@ -70,12 +81,12 @@ echo "$PLUGIN_INSTALL" | jq .
 USER_PLUGIN_ID=$(echo "$PLUGIN_INSTALL" | jq -r '.id')
 echo "  → User plugin ID: $USER_PLUGIN_ID"
 
-# ── 7. List installed plugins (should have 1) ─────────────────────────────────
-echo_step "7. List installed plugins (should show $PLUGIN)"
+# ── 8. List installed plugins (should have 1) ─────────────────────────────────
+echo_step "8. List installed plugins (should show $PLUGIN)"
 curl -sf "$BASE/api/plugins" -H "$AUTH" | jq .
 
-# ── 8. Fetch media items ──────────────────────────────────────────────────────
-echo_step "8. Fetch media items (page 1, pageSize 5)"
+# ── 9. Fetch media items ──────────────────────────────────────────────────────
+echo_step "9. Fetch media items (page 1, pageSize 5)"
 FETCH=$(curl -sf -X POST "$BASE/media/$PLUGIN/fetch?page=1&pageSize=5" \
   -H "Content-Type: application/json" \
   -H "$AUTH" \
@@ -86,12 +97,12 @@ ITEM_ID=$(echo "$FETCH" | jq -r '.items[0].id')
 TITLE=$(echo "$FETCH" | jq -r '.items[0].title')
 echo "  → Selected: \"$TITLE\" (id: $ITEM_ID)"
 
-# ── 9. Enrich media item ──────────────────────────────────────────────────────
-echo_step "9. Enrich \"$TITLE\" (id: $ITEM_ID)"
+# ── 10. Enrich media item ─────────────────────────────────────────────────────
+echo_step "10. Enrich \"$TITLE\" (id: $ITEM_ID)"
 curl -sf "$BASE/media/$PLUGIN/enrich/$ITEM_ID" -H "$AUTH" | jq .
 
-# ── 10. Add item to library ───────────────────────────────────────────────────
-echo_step "10. Add item to library"
+# ── 11. Add item to library ───────────────────────────────────────────────────
+echo_step "11. Add item to library"
 LIBRARY_ADD=$(curl -sf -X POST "$BASE/api/library/$USER_PLUGIN_ID/items" \
   -H "Content-Type: application/json" \
   -H "$AUTH" \
@@ -101,23 +112,23 @@ echo "$LIBRARY_ADD" | jq .
 USER_LIBRARY_ITEM_ID=$(echo "$LIBRARY_ADD" | jq -r '.id')
 echo "  → User library item ID: $USER_LIBRARY_ITEM_ID"
 
-# ── 11. List library items ────────────────────────────────────────────────────
-echo_step "11. List library items"
+# ── 12. List library items ────────────────────────────────────────────────────
+echo_step "12. List library items"
 curl -sf "$BASE/api/library/$USER_PLUGIN_ID/items" -H "$AUTH" | jq .
 
-# ── 12. Get settings ──────────────────────────────────────────────────────────
-echo_step "12. Get user settings (should have defaults)"
+# ── 13. Get settings ──────────────────────────────────────────────────────────
+echo_step "13. Get user settings (should have defaults)"
 curl -sf "$BASE/api/settings" -H "$AUTH" | jq .
 
-# ── 13. Update settings ───────────────────────────────────────────────────────
-echo_step "13. Update settings (enable NSFW and set dark theme)"
+# ── 14. Update settings ───────────────────────────────────────────────────────
+echo_step "14. Update settings (enable NSFW and set dark theme)"
 curl -sf -X PUT "$BASE/api/settings" \
   -H "Content-Type: application/json" \
   -H "$AUTH" \
   -d '{"nsfw_enabled":true,"theme":"dark"}' | jq .
 
-# ── 14. Create a playlist ─────────────────────────────────────────────────────
-echo_step "14. Create a playlist"
+# ── 15. Create a playlist ─────────────────────────────────────────────────────
+echo_step "15. Create a playlist"
 PLAYLIST=$(curl -sf -X POST "$BASE/api/playlists" \
   -H "Content-Type: application/json" \
   -H "$AUTH" \
@@ -127,13 +138,15 @@ echo "$PLAYLIST" | jq .
 PLAYLIST_ID=$(echo "$PLAYLIST" | jq -r '.id')
 echo "  → Playlist ID: $PLAYLIST_ID"
 
-# ── 15. List playlists ────────────────────────────────────────────────────────
-echo_step "15. List playlists"
+# ── 16. List playlists ────────────────────────────────────────────────────────
+echo_step "16. List playlists"
 curl -sf "$BASE/api/playlists" -H "$AUTH" | jq .
 
-# ── 16. Add item to playlist ──────────────────────────────────────────────────
-echo_step "16. Add library item to playlist"
-PLAYLIST_ITEM=$(curl -sf -X POST "$BASE/api/playlists/$PLAYLIST_ID/items" \
+# ── 17. Add item to playlist ──────────────────────────────────────────────────
+echo_step "17. Add library item to playlist"
+echo "  → Playlist ID: $PLAYLIST_ID"
+echo "  → User library item ID: $USER_LIBRARY_ITEM_ID"
+PLAYLIST_ITEM=$(curl -s -X POST "$BASE/api/playlists/$PLAYLIST_ID/items" \
   -H "Content-Type: application/json" \
   -H "$AUTH" \
   -d "{\"user_library_item_id\":\"$USER_LIBRARY_ITEM_ID\"}")
@@ -142,55 +155,82 @@ echo "$PLAYLIST_ITEM" | jq .
 PLAYLIST_ITEM_ID=$(echo "$PLAYLIST_ITEM" | jq -r '.id')
 echo "  → Playlist item ID: $PLAYLIST_ITEM_ID"
 
-# ── 17. List playlist items ───────────────────────────────────────────────────
-echo_step "17. List playlist items"
+# ── 18. List playlist items ───────────────────────────────────────────────────
+echo_step "18. List playlist items"
 curl -sf "$BASE/api/playlists/$PLAYLIST_ID/items" -H "$AUTH" | jq .
 
-# ── 18. Rename playlist ───────────────────────────────────────────────────────
-echo_step "18. Rename playlist"
+# ── 19. Rename playlist ───────────────────────────────────────────────────────
+echo_step "19. Rename playlist"
 curl -sf -X PATCH "$BASE/api/playlists/$PLAYLIST_ID" \
   -H "Content-Type: application/json" \
   -H "$AUTH" \
   -d '{"name":"Renamed Demo Playlist"}' | jq .
 
-# ── 19. Update playlist item index ────────────────────────────────────────────
-echo_step "19. Update playlist item index"
-curl -sf -X PATCH "$BASE/api/playlists/$PLAYLIST_ID/items/$PLAYLIST_ITEM_ID" \
+# ── 20. Update playlist item index ────────────────────────────────────────────
+echo_step "20. Update playlist item index"
+curl -s -X PATCH "$BASE/api/playlists/$PLAYLIST_ID/items/$PLAYLIST_ITEM_ID" \
   -H "Content-Type: application/json" \
   -H "$AUTH" \
-  -d '{"index":5.0}' | jq .
+  -d '{"index":5}' | jq .
 
-# ── 20. Disable plugin ────────────────────────────────────────────────────────
-echo_step "20. Disable plugin"
+# ── 21. Disable plugin ────────────────────────────────────────────────────────
+echo_step "21. Disable plugin"
 curl -sf -X PATCH "$BASE/api/plugins/$PLUGIN" \
   -H "Content-Type: application/json" \
   -H "$AUTH" \
   -d '{"enabled":false}' | jq .
 
-# ── 21. Re-enable plugin ──────────────────────────────────────────────────────
-echo_step "21. Re-enable plugin"
+# ── 22. Re-enable plugin ──────────────────────────────────────────────────────
+echo_step "22. Re-enable plugin"
 curl -sf -X PATCH "$BASE/api/plugins/$PLUGIN" \
   -H "Content-Type: application/json" \
   -H "$AUTH" \
   -d '{"enabled":true}' | jq .
 
-# ── 22. Remove item from playlist ─────────────────────────────────────────────
-echo_step "22. Remove item from playlist"
-curl -sf -X DELETE "$BASE/api/playlists/$PLAYLIST_ID/items/$USER_LIBRARY_ITEM_ID" \
-  -H "$AUTH" | jq -c .
+# ── 23. Remove item from playlist ─────────────────────────────────────────────
+echo_step "23. Remove item from playlist"
+HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE "$BASE/api/playlists/$PLAYLIST_ID/items/$USER_LIBRARY_ITEM_ID" -H "$AUTH")
+if [ "$HTTP_CODE" = "204" ]; then
+  echo "  ✓ Item removed from playlist"
+else
+  echo "  ✗ Failed with HTTP $HTTP_CODE"
+fi
 
-# ── 23. Delete playlist ───────────────────────────────────────────────────────
-echo_step "23. Delete playlist"
-curl -sf -X DELETE "$BASE/api/playlists/$PLAYLIST_ID" -H "$AUTH" | jq -c .
+# ── 24. Delete playlist ───────────────────────────────────────────────────────
+echo_step "24. Delete playlist"
+HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE "$BASE/api/playlists/$PLAYLIST_ID" -H "$AUTH")
+if [ "$HTTP_CODE" = "204" ]; then
+  echo "  ✓ Playlist deleted"
+else
+  echo "  ✗ Failed with HTTP $HTTP_CODE"
+fi
 
-# ── 24. Remove item from library ──────────────────────────────────────────────
-echo_step "24. Remove item from library"
-curl -sf -X DELETE "$BASE/api/library/$USER_PLUGIN_ID/items/$ITEM_ID" \
-  -H "$AUTH" | jq -c .
+# ── 25. Remove item from library ──────────────────────────────────────────────
+echo_step "25. Remove item from library"
+HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE "$BASE/api/library/$USER_PLUGIN_ID/items/$ITEM_ID" -H "$AUTH")
+if [ "$HTTP_CODE" = "204" ]; then
+  echo "  ✓ Item removed from library"
+else
+  echo "  ✗ Failed with HTTP $HTTP_CODE"
+fi
 
-# ── 25. Uninstall plugin ──────────────────────────────────────────────────────
-echo_step "25. Uninstall plugin"
-curl -sf -X DELETE "$BASE/api/plugins/$PLUGIN" -H "$AUTH" | jq -c .
+# ── 26. Uninstall plugin ──────────────────────────────────────────────────────
+echo_step "26. Uninstall plugin"
+HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE "$BASE/api/plugins/$PLUGIN" -H "$AUTH")
+if [ "$HTTP_CODE" = "204" ]; then
+  echo "  ✓ Plugin uninstalled"
+else
+  echo "  ✗ Failed with HTTP $HTTP_CODE"
+fi
+
+# ── 27. Delete account ────────────────────────────────────────────────────────
+echo_step "27. Delete account"
+HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE "$BASE/api/account" -H "$AUTH")
+if [ "$HTTP_CODE" = "204" ]; then
+  echo "  ✓ Account deleted (all user data cascaded)"
+else
+  echo "  ✗ Failed with HTTP $HTTP_CODE"
+fi
 
 echo
 echo "──────────────────────────────────────────"

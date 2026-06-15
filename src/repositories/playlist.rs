@@ -107,7 +107,7 @@ pub async fn add_item(
         "SELECT MAX(index) FROM user_playlist_items WHERE playlist_id = $1"
     )
         .bind(playlist_id)
-        .fetch_optional(&mut *tx)
+        .fetch_one(&mut *tx)
         .await?;
 
     let new_index = max_index.unwrap_or(-1.0) + 1.0;

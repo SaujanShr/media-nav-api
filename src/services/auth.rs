@@ -104,3 +104,14 @@ pub async fn login(pool: &PgPool, username: &str, password: &str, secret: &str) 
 
     build_result(&user, secret)
 }
+
+pub async fn delete(pool: &PgPool, user_id: &str) -> Result<(), AuthError> {
+    user_repo::delete(pool, user_id)
+        .await
+        .map_err(|e| {
+            tracing::error!("Database error deleting user: {}", e);
+            AuthError::Internal
+        })?;
+
+    Ok(())
+}

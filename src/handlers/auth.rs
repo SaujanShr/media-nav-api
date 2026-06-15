@@ -1,5 +1,5 @@
 use actix_web::{
-    get, post, Responder,
+    delete, get, post, Responder,
     HttpRequest, HttpResponse
 };
 use actix_web::web::{Data, Json, ServiceConfig, scope};
@@ -53,11 +53,22 @@ async fn login(state: Data<AppState>, body: Json<AuthRequest>) -> impl Responder
         .unwrap_or_else(error_response)
 }
 
-/// `GET /api/auth/me`
-#[get("/me")]
+/// `GET /api/account`
+#[get("")]
 async fn me(req: HttpRequest) -> impl Responder {
     let claims = assert_ok!(extractor::claims(&req));
     HttpResponse::Ok().json(claims)
+}
+
+/// `DELETE /api/account`
+#[delete("")]
+async fn delete(req: HttpRequest, state: Data<AppState>) -> impl Responder {
+    let claims = assert_ok!(extractor::claims(&req));
+
+    auth_service::delete(&state.db, &claims.sub)
+        .await
+        .map(|_| HttpResponse::NoContent().finish())
+        .unwrap_or_else(error_response)
 }
 
 // ── Public ────────────────────────────────────────────────────────────────────
@@ -72,7 +83,8 @@ pub fn public_routes(cfg: &mut ServiceConfig) {
 
 pub fn protected_routes(cfg: &mut ServiceConfig) {
     cfg.service(
-        scope("/auth")
-            .service(me),
+        scope("/account")
+            .service(me)
+            .service(delete),
     );
 }

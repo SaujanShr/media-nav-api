@@ -43,7 +43,7 @@ curl -sf "$BASE/plugins/all" | jq .
 
 # ── 3. Register ───────────────────────────────────────────────────────────────
 echo_step "3. Register user: $USER"
-REGISTER=$(curl -sf -X POST "$BASE/auth/register" \
+REGISTER=$(curl -sf -X POST "$BASE/account/register" \
   -H "Content-Type: application/json" \
   -d "{\"username\":\"$USER\",\"password\":\"$PASS\"}")
 echo "$REGISTER" | jq .
@@ -53,7 +53,7 @@ AUTH="Authorization: Bearer $TOKEN"
 
 # ── 4. Login with same credentials ────────────────────────────────────────────
 echo_step "4. Login with existing user"
-LOGIN=$(curl -sf -X POST "$BASE/auth/login" \
+LOGIN=$(curl -sf -X POST "$BASE/account/login" \
   -H "Content-Type: application/json" \
   -d "{\"username\":\"$USER\",\"password\":\"$PASS\"}")
 echo "$LOGIN" | jq .

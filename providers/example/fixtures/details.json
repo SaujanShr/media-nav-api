@@ -22,7 +22,7 @@
       ]
     },
     "resources": {
-      "thumbnail": "https://example.com/thumb1.png",
+      "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/c/ce/MrBeast_2023_%28cropped%29.jpg",
       "preview": [
         {
           "media_type": "image",
@@ -67,7 +67,7 @@
       ]
     },
     "resources": {
-      "thumbnail": "https://example.com/thumb2.png",
+      "thumbnail": "https://www.reddit.com/media?url=https%3A%2F%2Fi.redd.it%2Ftd830ud8voqa1.jpg",
       "preview": [
         {
           "media_type": "image",
@@ -114,7 +114,7 @@
       ]
     },
     "resources": {
-      "thumbnail": "https://example.com/thumb3.png",
+      "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/4/4a/MrBeast_frontface_2021.png",
       "preview": [],
       "media": {
         "item": {

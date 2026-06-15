@@ -13,6 +13,8 @@ help: ## Show this help message
 # ── Full Stack ─────────────────────────────────────────────────────────────────
 
 run: build db-start start-providers ## Build everything, start database and providers, then run server
+	@echo "→ Killing any running server on port 8080..."
+	@lsof -ti:8080 | xargs kill -9 2>/dev/null || echo "  ✓ No server running on port 8080"
 	@echo "→ Waiting for database to be ready..."
 	@for i in $$(seq 1 30); do \
 		if docker compose exec -T postgres pg_isready > /dev/null 2>&1; then \
@@ -71,6 +73,8 @@ build-server: build-plugins ## Build the main Rust server
 	$(CARGO) build --package media-nav-api
 
 clean-server: ## Remove Rust build artifacts
+	@echo "→ Killing any running server on port 8080..."
+	@lsof -ti:8080 | xargs kill -9 2>/dev/null || echo "  ✓ No server running on port 8080"
 	cargo clean
 
 # ── Database ───────────────────────────────────────────────────────────────────

@@ -2,16 +2,16 @@
   {
     "id": "example-item-1",
     "title": "Example Item 1",
-    "thumbnail_url": "https://example.com/thumb1.png"
+    "thumbnail_url": "https://upload.wikimedia.org/wikipedia/commons/c/ce/MrBeast_2023_%28cropped%29.jpg"
   },
   {
     "id": "example-item-2",
     "title": "Example Item 2",
-    "thumbnail_url": "https://example.com/thumb2.png"
+    "thumbnail_url": "https://www.reddit.com/media?url=https%3A%2F%2Fi.redd.it%2Ftd830ud8voqa1.jpg"
   },
   {
     "id": "example-item-3",
     "title": "Example Item 3",
-    "thumbnail_url": "https://example.com/thumb3.png"
+    "thumbnail_url": "https://upload.wikimedia.org/wikipedia/commons/4/4a/MrBeast_frontface_2021.png"
   }
 ]

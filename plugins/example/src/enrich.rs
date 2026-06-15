@@ -1,53 +1,23 @@
-use plugin_sdk::library_item::{LibraryItemAttribute, LibraryItemDetail, LibraryItemMetadata, LibraryItemResources};
-use plugin_sdk::media_item::{Media, MediaItem, MediaType};
+use plugin_sdk::library_item::LibraryItemDetail;
+
+const PROVIDER_URL: &str = "http://localhost:4000";
 
 pub fn enrich(id: &str) -> Option<LibraryItemDetail> {
-    match id {
-        "example-item-1" => Some(LibraryItemDetail {
-            id: id.to_string(),
-            version: Some("1.0".to_string()),
-            metadata: LibraryItemMetadata {
-                title:      "Example Item".to_string(),
-                subtitle:   Some("Example Subtitle".to_string()),
-                summary:    Some("Example Summary".to_string()),
-                attributes: vec![
-                    LibraryItemAttribute {
-                        label: "Attribute 1".to_string(),
-                        value: "Value 1".to_string(),
-                    },
-                    LibraryItemAttribute {
-                        label: "Attribute 2".to_string(),
-                        value: "Value 2".to_string(),
-                    },
-                    LibraryItemAttribute {
-                        label: "Attribute 3".to_string(),
-                        value: "Value 3".to_string(),
-                    },
-                ],
-            },
-            resources: LibraryItemResources {
-                thumbnail: "https://example.com/thumb.png".to_string(),
-                preview: vec![
-                    MediaItem {
-                        media_type: MediaType::Image,
-                        title: Some("Preview 1".to_string()),
-                        url: "https://example.com/thumb.png".to_string(),
-                    },
-                    MediaItem {
-                        media_type: MediaType::Image,
-                        title: Some("Preview 2".to_string()),
-                        url: "https://example.com/thumb.png".to_string(),
-                    }
-                ],
-                media: Some(Media::Item(
-                    MediaItem {
-                        media_type: MediaType::Video,
-                        title: Some("Example Video".to_string()),
-                        url: "https://example.com/video.mp4".to_string(),
-                    }
-                ))
-            },
-        }),
-        _ => None,
+    let url = format!("{}/items/{}", PROVIDER_URL, id);
+
+    match ureq::get(&url).call() {
+        Ok(mut response) => {
+            match response.body_mut().read_json::<LibraryItemDetail>() {
+                Ok(detail) => Some(detail),
+                Err(e) => {
+                    eprintln!("Failed to parse item detail for {}: {}", id, e);
+                    None
+                }
+            }
+        }
+        Err(e) => {
+            eprintln!("Failed to enrich item {}: {}", id, e);
+            None
+        }
     }
 }

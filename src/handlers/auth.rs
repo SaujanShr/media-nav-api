@@ -35,7 +35,7 @@ fn error_response(err: AuthError) -> HttpResponse {
 
 // ── Handlers ──────────────────────────────────────────────────────────────────
 
-/// `POST /auth/register`
+/// `POST /account/register`
 #[post("/register")]
 async fn register(state: Data<AppState>, body: Json<AuthRequest>) -> impl Responder {
     auth_service::register(&state.db, &body.username, &body.password, &state.jwt_secret)
@@ -44,7 +44,7 @@ async fn register(state: Data<AppState>, body: Json<AuthRequest>) -> impl Respon
         .unwrap_or_else(error_response)
 }
 
-/// `POST /auth/login`
+/// `POST /account/login`
 #[post("/login")]
 async fn login(state: Data<AppState>, body: Json<AuthRequest>) -> impl Responder {
     auth_service::login(&state.db, &body.username, &body.password, &state.jwt_secret)
@@ -75,7 +75,7 @@ async fn delete(req: HttpRequest, state: Data<AppState>) -> impl Responder {
 
 pub fn public_routes(cfg: &mut ServiceConfig) {
     cfg.service(
-        scope("/auth")
+        scope("/account")
             .service(register)
             .service(login),
     );

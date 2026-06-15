@@ -1,6 +1,6 @@
 use sqlx::{PgPool, Error, query, query_as};
 
-use crate::models::user::{User, UserSettings};
+use crate::models::user::{User, UserSettings, Theme};
 
 // ── Public ────────────────────────────────────────────────────────────────────
 
@@ -35,7 +35,7 @@ pub async fn create(
 
 pub async fn get_settings(pool: &PgPool, user_id: &str) -> Result<UserSettings, Error> {
     query_as::<_, UserSettings>("
-        SELECT   user_id, nsfw_enabled
+        SELECT   user_id, nsfw_enabled, theme
         FROM     user_settings
         WHERE    user_id = $1
         ")
@@ -44,15 +44,27 @@ pub async fn get_settings(pool: &PgPool, user_id: &str) -> Result<UserSettings, 
         .await
 }
 
-pub async fn set_nsfw_enabled(pool: &PgPool, user_id: &str, nsfw_enabled: bool) -> Result<UserSettings, Error> {
+pub async fn create_default_settings(pool: &PgPool, user_id: &str) -> Result<(), Error> {
+    query("
+        INSERT INTO user_settings (user_id, nsfw_enabled, theme)
+        VALUES ($1, FALSE, 'default')
+        ")
+        .bind(user_id)
+        .execute(pool)
+        .await?;
+    Ok(())
+}
+
+pub async fn update_settings(pool: &PgPool, user_id: &str, nsfw_enabled: bool, theme: &Theme) -> Result<UserSettings, Error> {
     query_as::<_, UserSettings>("
-        INSERT INTO user_settings (user_id, nsfw_enabled)
-        VALUES ($1, $2)
-        ON CONFLICT (user_id) DO UPDATE SET nsfw_enabled = EXCLUDED.nsfw_enabled
-        RETURNING user_id, nsfw_enabled
+        UPDATE user_settings
+        SET    nsfw_enabled = $2, theme = $3
+        WHERE  user_id = $1
+        RETURNING user_id, nsfw_enabled, theme
         ")
         .bind(user_id)
         .bind(nsfw_enabled)
+        .bind(theme)
         .fetch_one(pool)
         .await
 }

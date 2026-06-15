@@ -7,6 +7,6 @@ pub struct UserLibraryItem {
     pub id: String,
     pub user_plugin_id: String,
     pub library_item_id: String,
-    pub version: String,
+    pub version: Option<String>,
     pub last_accessed: DateTime<Utc>,
 }

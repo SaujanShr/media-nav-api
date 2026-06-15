@@ -32,7 +32,7 @@ pub struct LibraryItem {
 #[derive(Serialize)]
 pub struct LibraryItemDetail {
     pub id:        String,
-    pub version:   String,
+    pub version:   Option<String>,
     pub metadata:  LibraryItemMetadata,
     pub resources: LibraryItemResources,
 }

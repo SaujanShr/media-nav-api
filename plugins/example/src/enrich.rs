@@ -5,7 +5,7 @@ pub fn enrich(id: &str) -> Option<LibraryItemDetail> {
     match id {
         "example-item-1" => Some(LibraryItemDetail {
             id: id.to_string(),
-            version: "1.0".to_string(),
+            version: Some("1.0".to_string()),
             metadata: LibraryItemMetadata {
                 title:      "Example Item".to_string(),
                 subtitle:   Some("Example Subtitle".to_string()),

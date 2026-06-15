@@ -35,6 +35,7 @@ fn error_response(err: AuthError) -> HttpResponse {
 
 // ── Handlers ──────────────────────────────────────────────────────────────────
 
+/// `POST /auth/register`
 #[post("/register")]
 async fn register(state: Data<AppState>, body: Json<AuthRequest>) -> impl Responder {
     auth_service::register(&state.db, &body.username, &body.password, &state.jwt_secret)
@@ -43,6 +44,7 @@ async fn register(state: Data<AppState>, body: Json<AuthRequest>) -> impl Respon
         .unwrap_or_else(error_response)
 }
 
+/// `POST /auth/login`
 #[post("/login")]
 async fn login(state: Data<AppState>, body: Json<AuthRequest>) -> impl Responder {
     auth_service::login(&state.db, &body.username, &body.password, &state.jwt_secret)
@@ -51,6 +53,7 @@ async fn login(state: Data<AppState>, body: Json<AuthRequest>) -> impl Responder
         .unwrap_or_else(error_response)
 }
 
+/// `GET /api/auth/me`
 #[get("/me")]
 async fn me(req: HttpRequest) -> impl Responder {
     let claims = assert_ok!(extractor::claims(&req));

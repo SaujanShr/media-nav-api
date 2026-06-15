@@ -56,7 +56,7 @@ async fn list(req: HttpRequest, state: Data<AppState>) -> impl Responder {
 async fn install(req: HttpRequest, state: Data<AppState>, body: Json<InstallRequest>) -> impl Responder {
     let user_id = assert_ok!(user_id(&req));
 
-    plugin_service::install(&state.db, &user_id, &body.plugin_id)
+    plugin_service::install(&state.db, &state.plugins, &user_id, &body.plugin_id)
         .await
         .map(|plugin| HttpResponse::Created().json(plugin))
         .unwrap_or_else(error_response)

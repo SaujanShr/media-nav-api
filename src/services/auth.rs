@@ -70,6 +70,14 @@ pub async fn register(pool: &PgPool, username: &str, password: &str, secret: &st
             AuthError::Internal
         })?;
 
+    // Create default settings for the new user
+    user_repo::create_default_settings(pool, &id)
+        .await
+        .map_err(|e| {
+            tracing::error!("Database error creating user settings: {}", e);
+            AuthError::Internal
+        })?;
+
     let user = user_repo::find_by_username(pool, username)
         .await
         .map_err(|e| {

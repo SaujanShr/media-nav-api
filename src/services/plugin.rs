@@ -30,12 +30,14 @@ pub async fn list(pool: &PgPool, user_id: &str) -> Result<Vec<UserPlugin>, Plugi
 
 pub async fn install(
     pool: &PgPool,
+    registry: &PluginRegistry,
     user_id: &str,
     plugin_id: &str,
 ) -> Result<UserPlugin, PluginError> {
+    let plugin = registry.get(plugin_id).ok_or(PluginError::NotFound)?;
     let id = Uuid::new_v4().to_string();
 
-    plugin_repo::install(pool, &id, user_id, plugin_id)
+    plugin_repo::install(pool, &id, user_id, plugin_id, plugin.version)
         .await
         .map_err(|e|
             if is_duplicate_key(&e) { PluginError::AlreadyInstalled }

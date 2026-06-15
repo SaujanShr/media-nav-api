@@ -6,7 +6,7 @@ use crate::models::library_item::UserLibraryItem;
 
 pub async fn list(pool: &PgPool, user_plugin_id: &str) -> Result<Vec<UserLibraryItem>, Error> {
     query_as::<_, UserLibraryItem>("
-        SELECT   id, user_plugin_id, library_item_id, last_accessed
+        SELECT   id, user_plugin_id, library_item_id, version, last_accessed
         FROM     user_library_items
         WHERE    user_plugin_id = $1
         ")
@@ -24,7 +24,7 @@ pub async fn add(
     query_as::<_, UserLibraryItem>("
         INSERT INTO user_library_items (id, user_plugin_id, library_item_id)
         VALUES ($1, $2, $3)
-        RETURNING id, user_plugin_id, library_item_id, last_accessed
+        RETURNING id, user_plugin_id, library_item_id, version, last_accessed
         ")
         .bind(id)
         .bind(user_plugin_id)

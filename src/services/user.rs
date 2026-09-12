@@ -23,7 +23,6 @@ pub async fn get(pool: &PgPool, user_id: &str) -> Result<UserSettings, UserSetti
 }
 
 pub async fn update(pool: &PgPool, user_id: &str, request: UpdateSettingsRequest) -> Result<UserSettings, UserSettingsError> {
-    // Get current settings
     let mut settings = user_repo::get_settings(pool, user_id)
         .await
         .map_err(|e| match e {
@@ -31,15 +30,14 @@ pub async fn update(pool: &PgPool, user_id: &str, request: UpdateSettingsRequest
             _ => UserSettingsError::Internal,
         })?;
 
-    // Apply updates from request
     if let Some(nsfw_enabled) = request.nsfw_enabled {
         settings.nsfw_enabled = nsfw_enabled;
     }
+
     if let Some(theme) = request.theme {
         settings.theme = theme;
     }
 
-    // Save updated settings
     user_repo::update_settings(pool, user_id, settings.nsfw_enabled, &settings.theme)
         .await
         .map_err(|e| match e {

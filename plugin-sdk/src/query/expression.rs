@@ -9,6 +9,7 @@ pub enum SortDirection {
     Desc,
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct SortOption {
     pub sort:       String,
     pub ascending:  bool,

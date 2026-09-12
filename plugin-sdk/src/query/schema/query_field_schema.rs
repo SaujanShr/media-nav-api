@@ -1,3 +1,5 @@
+use serde::{Deserialize, Serialize};
+
 use crate::query::expression::{FilterExpression, SortExpression};
 use crate::query::schema::{
     BooleanFieldSchema, DateFieldSchema, FilterFieldSchema,
@@ -5,6 +7,8 @@ use crate::query::schema::{
 };
 use crate::query::Query;
 
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum QueryFieldSchema {
     Search(SearchFieldSchema),
     Boolean(BooleanFieldSchema),

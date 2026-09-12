@@ -290,15 +290,12 @@ docker compose exec postgres psql -U <user> -d media_nav_db -c "\dt"
 **Solutions:**
 ```sh
 # 1. Check plugin was built and installed
-ls -la plugins/*.dylib plugins/*.so
+ls -la plugins/*.wasm
 
 # 2. Rebuild and install
 make build-plugins
 
-# 3. Check permissions (macOS)
-codesign -dv plugins/libexample_plugin.dylib
-
-# 4. Check PLUGINS_DIR in .env
+# 3. Check PLUGINS_DIR in .env
 cat .env | grep PLUGINS_DIR
 ```
 
@@ -330,7 +327,6 @@ make db-reset
 
 - **Add a plugin:** See [plugins/README.md](plugins/README.md)
 - **Add a provider:** See [providers/README.md](providers/README.md)
-- **API Documentation:** Check the `/api-docs` endpoint (if enabled)
 - **Run tests:** `cargo test`
 
 ## Getting Help

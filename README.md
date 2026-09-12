@@ -68,63 +68,6 @@ Once everything is running, try the demo script:
 
 This demonstrates the full flow: register → login → fetch → enrich → get media.
 
-## Commands
-
-### Full Stack
-
-```sh
-make run              # build all, start database & providers, run server
-make build            # build plugins, providers, and server
-make setup            # install all dependencies
-make start            # start database and providers (without building)
-make stop             # stop database and providers
-make clean            # remove all build artifacts and dependencies
-make logs             # show logs from database and providers
-make help             # show all available targets with descriptions
-```
-
-### Database
-
-```sh
-make db-start         # start PostgreSQL in Docker (port 5433)
-make db-stop          # stop database
-make db-reset         # wipe and restart database (destructive)
-make db-logs          # follow database logs
-make db-shell         # open psql shell to media_nav_db
-make db-clean         # remove container and volumes (destructive)
-```
-
-**Note:** Port 5433 is used by default to avoid conflicts with existing PostgreSQL installations on port 5432.
-
-### Plugins
-
-```sh
-make build-plugins    # build and install all plugin dylibs
-make clean-plugins    # remove installed plugins
-# Or use plugins/Makefile directly for finer control
-```
-
-### Providers
-
-```sh
-make setup-providers    # install provider dependencies
-make start-providers    # start provider servers in background
-make stop-providers     # stop provider servers
-make clean-providers    # remove provider artifacts
-# Or use providers/Makefile directly for finer control
-```
-
-### Server
-
-```sh
-make build-server     # build the main Rust server
-make clean-server     # remove Rust build artifacts
-cargo run             # run server directly (assumes db/providers are running)
-
-# Optional: enable debug logging
-export RUST_LOG=media_nav_api=debug,actix_web=info
-```
-
 ## Troubleshooting
 
 ### Port 5432 already in use
@@ -169,6 +112,6 @@ make stop-providers && make start-providers
 
 ## Contributing
 
-**Add a plugin:** Create a Cargo workspace member under `plugins/` following the `example` plugin structure. See [plugins/README.md](plugins/README.md).
+**Add a plugin:** Create a standalone crate under `plugins/` targeting `wasm32-wasip1`, following the `example` plugin structure. See [plugins/README.md](plugins/README.md).
 
 **Add a provider:** Create a subdirectory under `providers/` with HTTP endpoints. Add targets to `providers/Makefile`. See [providers/README.md](providers/README.md).

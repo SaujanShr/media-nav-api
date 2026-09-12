@@ -1,5 +1,6 @@
+use serde::{Deserialize, Serialize};
 
-/// Numeric range field. Bounds are `[from, to]`; either may be `None`.
+#[derive(Serialize, Deserialize)]
 pub struct NumberFieldSchema {
     pub min:            Option<f32>,
     pub max:            Option<f32>,

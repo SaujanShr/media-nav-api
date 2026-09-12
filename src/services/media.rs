@@ -1,34 +1,80 @@
+use std::sync::Arc;
+
+use actix_web::web;
+
 use plugin_sdk::library_item::LibraryItemDetail;
 use plugin_sdk::plugin::{FetchRequest, FetchResult};
+use plugin_sdk::query::schema::QuerySchema;
 use plugin_sdk::query::Query;
 
-use crate::plugins::PluginRegistry;
+use crate::plugins::{wasm, PluginRegistry};
 use crate::services::plugin::PluginError;
+
+// ── Private ───────────────────────────────────────────────────────────────────
+
+fn as_internal<T>(result: Result<T, wasm::CallError>) -> Result<T, PluginError> {
+    result.map_err(|e| {
+        tracing::error!("{}", e);
+        PluginError::Internal
+    })
+}
 
 // ── Public ────────────────────────────────────────────────────────────────────
 
-pub fn fetch(
+pub fn schema(registry: &PluginRegistry, plugin_id: &str) -> Result<Arc<QuerySchema>, PluginError> {
+    Ok(registry.get(plugin_id).ok_or(PluginError::NotFound)?.schema.clone())
+}
+
+pub async fn fetch(
     registry: &PluginRegistry,
     plugin_id: &str,
     page: u32,
     page_size: u32,
     query: Query,
 ) -> Result<FetchResult, PluginError> {
-    let plugin = registry
-        .get(plugin_id)
-        .ok_or(PluginError::NotFound)?;
+    let plugin = registry.get(plugin_id).ok_or(PluginError::NotFound)?;
 
-    Ok((plugin.fetch)(FetchRequest { page, page_size, query }))
+    plugin.schema.validate(&query).map_err(|errors| {
+        let message = errors
+            .into_iter()
+            .map(|e| format!("{}: {}", e.field, e.message))
+            .collect::<Vec<_>>()
+            .join("; ");
+        PluginError::ValidationError(message)
+    })?;
+
+    let wasm_bytes = plugin.wasm.clone();
+    let request = FetchRequest { page, page_size, query };
+
+    let call_result = web::block(move || wasm::fetch(&wasm_bytes, &request))
+        .await
+        .map_err(|e| {
+            tracing::error!("Plugin fetch task panicked: {}", e);
+            PluginError::Internal
+        })?;
+
+    as_internal(call_result)?.map_err(PluginError::UpstreamError)
 }
 
-pub fn enrich(
+pub async fn enrich(
     registry: &PluginRegistry,
     plugin_id: &str,
     item_id: &str,
 ) -> Result<Option<LibraryItemDetail>, PluginError> {
-    let plugin = registry
+    let wasm_bytes = registry
         .get(plugin_id)
-        .ok_or(PluginError::NotFound)?;
+        .ok_or(PluginError::NotFound)?
+        .wasm
+        .clone();
+    
+    let item_id = item_id.to_string();
 
-    Ok((plugin.enrich)(item_id))
+    let call_result = web::block(move || wasm::enrich(&wasm_bytes, &item_id))
+        .await
+        .map_err(|e| {
+            tracing::error!("Plugin enrich task panicked: {}", e);
+            PluginError::Internal
+        })?;
+
+    as_internal(call_result)?.map_err(PluginError::UpstreamError)
 }

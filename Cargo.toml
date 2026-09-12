@@ -1,5 +1,5 @@
 [workspace]
-members = [".", "plugin-sdk", "plugins/example"]
+members = [".", "plugin-sdk"]
 resolver = "2"
 
 [package]
@@ -19,8 +19,8 @@ uuid = { version = "1.23", features = ["v4"] }
 sqlx = { version = "0.8", features = ["runtime-tokio-native-tls", "postgres", "migrate", "chrono"] }
 chrono = { version = "0.4", features = ["serde"] }
 dotenvy = "0.15"
-libloading = "0.9"
 actix-governor = "0.10"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 validator = { version = "0.20", features = ["derive"] }
+extism = "1.30.0"

@@ -1,7 +1,7 @@
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use plugin_sdk::plugin::Plugin;
+use plugin_sdk::plugin::{PluginCallError, PluginInfo};
 
 use crate::models::plugin::UserPlugin;
 use crate::plugins::PluginRegistry;
@@ -13,13 +13,15 @@ use super::is_duplicate_key;
 pub enum PluginError {
     AlreadyInstalled,
     NotFound,
+    ValidationError(String),
+    UpstreamError(PluginCallError),
     Internal,
 }
 
 // ── Public ────────────────────────────────────────────────────────────────────
 
-pub fn list_all(registry: &PluginRegistry) -> Vec<&Plugin> {
-    registry.plugins().collect()
+pub fn list_all(registry: &PluginRegistry) -> Vec<&PluginInfo> {
+    registry.plugins().map(|p| &p.info).collect()
 }
 
 pub async fn list(pool: &PgPool, user_id: &str) -> Result<Vec<UserPlugin>, PluginError> {
@@ -37,7 +39,7 @@ pub async fn install(
     let plugin = registry.get(plugin_id).ok_or(PluginError::NotFound)?;
     let id = Uuid::new_v4().to_string();
 
-    plugin_repo::install(pool, &id, user_id, plugin_id, plugin.version)
+    plugin_repo::install(pool, &id, user_id, plugin_id, &plugin.info.version)
         .await
         .map_err(|e|
             if is_duplicate_key(&e) { PluginError::AlreadyInstalled }
@@ -49,6 +51,7 @@ pub async fn uninstall(pool: &PgPool, user_id: &str, plugin_id: &str) -> Result<
     let deleted = plugin_repo::uninstall(pool, user_id, plugin_id)
         .await
         .map_err(|_| PluginError::Internal)?;
+    
     if !deleted {
         return Err(PluginError::NotFound);
     }

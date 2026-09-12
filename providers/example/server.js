@@ -29,17 +29,29 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', provider: 'example' });
 });
 
-// Get all items (with optional pagination)
+// Get all items (with optional pagination, search, and sort)
 app.get('/items', (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
-  const offset = (page - 1) * limit;
+  const { search, sort, direction } = req.query;
 
-  const paginatedItems = items.slice(offset, offset + limit);
+  let filtered = items;
+  if (search) {
+    const needle = search.toLowerCase();
+    filtered = filtered.filter(item => item.title.toLowerCase().includes(needle));
+  }
+
+  if (sort === 'title') {
+    filtered = [...filtered].sort((a, b) => a.title.localeCompare(b.title));
+    if (direction === 'desc') filtered.reverse();
+  }
+
+  const offset = (page - 1) * limit;
+  const paginatedItems = filtered.slice(offset, offset + limit);
 
   res.json({
     items: paginatedItems,
-    total: items.length,
+    total: filtered.length,
     page,
     limit
   });

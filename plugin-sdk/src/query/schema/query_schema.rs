@@ -1,7 +1,11 @@
 use std::collections::HashMap;
 
+use serde::{Deserialize, Serialize};
+
 use crate::query::schema::QueryFieldSchema;
 use crate::query::Query;
+
+// ── Types ─────────────────────────────────────────────────────────────────────
 
 pub struct QueryValidationError {
     pub field:   String,
@@ -14,8 +18,11 @@ impl QueryValidationError {
     }
 }
 
+// ── Schema ────────────────────────────────────────────────────────────────────
+
+#[derive(Serialize, Deserialize)]
 pub struct QuerySchema {
-    pub fields: HashMap<&'static str, QueryFieldSchema>,
+    pub fields: HashMap<String, QueryFieldSchema>,
 }
 
 impl QuerySchema {

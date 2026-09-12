@@ -2,127 +2,52 @@
   "example-item-1": {
     "id": "example-item-1",
     "version": "1.0",
-    "metadata": {
-      "title": "Example Item 1",
-      "subtitle": "A fascinating example",
-      "summary": "This is a detailed summary of Example Item 1. It demonstrates how media items can have rich metadata including descriptions, attributes, and various media resources.",
-      "attributes": [
-        {
-          "label": "Genre",
-          "value": "Example"
-        },
-        {
-          "label": "Year",
-          "value": "2024"
-        },
-        {
-          "label": "Rating",
-          "value": "5.0"
-        }
-      ]
-    },
-    "resources": {
-      "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/c/ce/MrBeast_2023_%28cropped%29.jpg",
-      "preview": [
-        {
-          "media_type": "image",
-          "title": "Preview Image 1",
-          "url": "https://example.com/preview1.png"
-        },
-        {
-          "media_type": "image",
-          "title": "Preview Image 2",
-          "url": "https://example.com/preview2.png"
-        }
-      ],
-      "media": {
-        "item": {
-          "media_type": "video",
-          "title": "Example Video",
-          "url": "https://example.com/video1.mp4"
-        }
-      }
-    }
+    "title": "Example Item 1",
+    "subtitle": "A fascinating example",
+    "description": "This is a detailed summary of Example Item 1. It demonstrates how media items can have rich metadata including descriptions, attributes, and various media resources.",
+    "genre": "Example",
+    "year": 2024,
+    "rating": 5.0,
+    "type_label": null,
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/c/ce/MrBeast_2023_%28cropped%29.jpg",
+    "preview_urls": [
+      "https://example.com/preview1.png",
+      "https://example.com/preview2.png"
+    ],
+    "video_urls": ["https://example.com/video1.mp4"],
+    "audio_urls": []
   },
   "example-item-2": {
     "id": "example-item-2",
     "version": "1.0",
-    "metadata": {
-      "title": "Example Item 2",
-      "subtitle": "Another great example",
-      "summary": "This is a detailed summary of Example Item 2. It showcases different types of media and metadata structures.",
-      "attributes": [
-        {
-          "label": "Genre",
-          "value": "Demo"
-        },
-        {
-          "label": "Year",
-          "value": "2024"
-        },
-        {
-          "label": "Rating",
-          "value": "4.8"
-        }
-      ]
-    },
-    "resources": {
-      "thumbnail": "https://www.reddit.com/media?url=https%3A%2F%2Fi.redd.it%2Ftd830ud8voqa1.jpg",
-      "preview": [
-        {
-          "media_type": "image",
-          "title": "Preview Image 1",
-          "url": "https://example.com/preview3.png"
-        }
-      ],
-      "media": {
-        "collection": {
-          "collection_type": "playlist",
-          "title": "Example Collection",
-          "items": [
-            {
-              "item": {
-                "media_type": "video",
-                "title": "Video 1",
-                "url": "https://example.com/video2-1.mp4"
-              }
-            },
-            {
-              "item": {
-                "media_type": "video",
-                "title": "Video 2",
-                "url": "https://example.com/video2-2.mp4"
-              }
-            }
-          ]
-        }
-      }
-    }
+    "title": "Example Item 2",
+    "subtitle": "Another great example",
+    "description": "This is a detailed summary of Example Item 2. It showcases different types of media and metadata structures.",
+    "genre": "Demo",
+    "year": 2024,
+    "rating": 4.8,
+    "type_label": null,
+    "thumbnail": "https://www.reddit.com/media?url=https%3A%2F%2Fi.redd.it%2Ftd830ud8voqa1.jpg",
+    "preview_urls": ["https://example.com/preview3.png"],
+    "video_urls": [
+      "https://example.com/video2-1.mp4",
+      "https://example.com/video2-2.mp4"
+    ],
+    "audio_urls": []
   },
   "example-item-3": {
     "id": "example-item-3",
     "version": "1.0",
-    "metadata": {
-      "title": "Example Item 3",
-      "subtitle": null,
-      "summary": null,
-      "attributes": [
-        {
-          "label": "Type",
-          "value": "Minimal Example"
-        }
-      ]
-    },
-    "resources": {
-      "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/4/4a/MrBeast_frontface_2021.png",
-      "preview": [],
-      "media": {
-        "item": {
-          "media_type": "audio",
-          "title": "Example Audio",
-          "url": "https://example.com/audio.mp3"
-        }
-      }
-    }
+    "title": "Example Item 3",
+    "subtitle": null,
+    "description": null,
+    "genre": null,
+    "year": null,
+    "rating": null,
+    "type_label": "Minimal Example",
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/4/4a/MrBeast_frontface_2021.png",
+    "preview_urls": [],
+    "video_urls": [],
+    "audio_urls": ["https://example.com/audio.mp3"]
   }
 }

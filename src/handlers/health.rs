@@ -3,7 +3,6 @@ use serde_json::json;
 
 // ── Handlers ──────────────────────────────────────────────────────────────────
 
-/// `GET /health`
 #[get("/health")]
 async fn health() -> impl Responder {
     HttpResponse::Ok().json(json!({ "status": "ok" }))

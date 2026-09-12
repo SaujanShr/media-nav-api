@@ -1,27 +1,14 @@
 # Plugins
 
-Dynamically-loaded Rust libraries that extend the API with new content sources. Each plugin provides schema definitions, fetch logic, and enrichment for media items.
-
-## Building
-
-```sh
-# From repository root
-make build-plugins      # compile and install all plugins
-
-# Or from plugins/ directory
-cd plugins
-make build              # compile all plugin dylibs
-make install            # copy to plugins/ and sign
-make clean              # remove installed plugins
-
-# Individual plugin
-make build-example
-make install-example
-```
+Sandboxed WebAssembly modules that extend the API with new content sources. Each plugin provides
+a query schema, fetch logic, and enrichment for media items, and runs through `extism`/`wasmtime` —
+not `dlopen`'d native code. The host talks to a plugin entirely over JSON via three exports:
+`plugin_info`, `schema`, `fetch`, and `enrich`.
 
 ## Creating a Plugin
 
-1. **Create workspace member:**
+1. **Create a standalone crate** (plugins are *not* members of the root workspace — they target
+   `wasm32-wasip1`, not the host's native arch):
    ```sh
    cd plugins
    cargo new --lib my-plugin
@@ -29,47 +16,50 @@ make install-example
 
 2. **Configure `plugins/my-plugin/Cargo.toml`:**
    ```toml
+   [workspace]
+
    [lib]
    crate-type = ["cdylib"]
 
    [dependencies]
    plugin-sdk = { path = "../../plugin-sdk" }
+   extism-pdk = "1.4"
+   serde = { version = "1.0", features = ["derive"] }
    ```
 
-3. **Add to root `Cargo.toml`:**
-   ```toml
-   [workspace]
-   members = ["plugins/my-plugin", ...]
-   ```
-
-4. **Implement plugin interface** (see `plugins/example/src/` for structure):
+3. **Implement the four exports** (see `plugins/example/src/` for a full reference):
    ```rust
-   use plugin_sdk::plugin::{Plugin, PluginMetadata, PluginResources};
+   use extism_pdk::{plugin_fn, FnResult, Json};
+   use plugin_sdk::plugin::{PluginInfo, PluginMetadata, PluginResources};
+   use plugin_sdk::query::schema::QuerySchema;
 
-   pub const PLUGIN: Plugin = Plugin {
-       id: "my-plugin",
-       version: "0.1.0",
-       metadata: PluginMetadata {
-           name: "My Plugin",
-           description: "What this plugin provides",
-           nsfw: false,
-       },
-       resources: PluginResources {
-           icon_url: "https://example.com/icon.png",
-           banner_url: "https://example.com/banner.png",
-       },
-       schema: schema::schema,    // query field definitions
-       fetch: fetch::fetch,       // paginated library items
-       enrich: enrich::enrich,    // detailed item metadata
-   };
-
-   #[no_mangle]
-   pub extern "C" fn _plugin_create() -> *const Plugin {
-       &PLUGIN
+   #[plugin_fn]
+   pub fn plugin_info() -> FnResult<Json<PluginInfo>> {
+       Ok(Json(PluginInfo {
+           id:      "my-plugin".into(),
+           version: "0.1.0".into(),
+           metadata:  PluginMetadata { name: "My Plugin".into(), description: "...".into(), nsfw: false },
+           resources: PluginResources { icon_url: "...".into(), banner_url: "...".into() },
+       }))
    }
+
+   #[plugin_fn]
+   pub fn schema() -> FnResult<Json<QuerySchema>> { /* declare queryable fields */ }
+
+   #[plugin_fn]
+   pub fn fetch(req: Json<plugin_sdk::plugin::FetchRequest>) -> FnResult<Json<plugin_sdk::plugin::FetchResult>> { /* ... */ }
+
+   #[plugin_fn]
+   pub fn enrich(id: Json<String>) -> FnResult<Json<Option<plugin_sdk::library_item::LibraryItemDetail>>> { /* ... */ }
    ```
 
-5. **Update `plugins/Makefile`** to include your new plugin targets (follow the example pattern).
+4. **Network access is denied by default.** A plugin can only reach hosts listed in
+   `ALLOWED_HOSTS` in `src/plugins/mod.rs` on the host side, via `extism_pdk::http::request` —
+   there's no raw socket access. Add your provider's host there if it isn't already covered.
+
+5. **Update `plugins/Makefile`** to add build/install targets for your plugin (follow the
+   `example` pattern — build with `--target wasm32-wasip1`, copy the resulting `.wasm` into
+   `plugins/`).
 
 6. **Build and test:**
    ```sh
@@ -81,19 +71,20 @@ make install-example
 
 ```
 plugins/example/
-├── Cargo.toml
+├── Cargo.toml       # standalone workspace, wasm32-wasip1 target
 └── src/
-    ├── lib.rs       # entry point, exports _plugin_create
-    ├── plugin.rs    # Plugin constant and metadata
-    ├── schema.rs    # query schema (search/filter/sort fields)
-    ├── fetch.rs     # fetch library items from provider
-    └── enrich.rs    # enrich item details from provider
+    ├── lib.rs        # entry points: plugin_info, schema, fetch, enrich
+    ├── schema.rs      # query schema (search/filter/sort fields)
+    ├── fetch.rs       # fetch library items from provider
+    └── enrich.rs      # enrich item details from provider
 ```
 
 ## Tips
 
 - **Reference:** Use `plugins/example/` as template
-- **SDK:** See `plugin-sdk/src/` for models and types
-- **Provider communication:** Use `reqwest` to call provider HTTP APIs
+- **SDK:** See `plugin-sdk/src/` for models and types — everything crossing the host↔guest
+  boundary must be `Serialize + Deserialize` (no `fn` pointers, no `&'static` borrows)
+- **Provider communication:** Use `extism_pdk::http::request`, not a native HTTP client — the
+  guest has no socket access outside what the host's manifest allows
 - **Errors:** Return `None` or empty results, don't panic
 - **Reloading:** Restart API server after rebuilding

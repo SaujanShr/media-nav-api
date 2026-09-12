@@ -2,42 +2,12 @@
 
 Standalone HTTP servers that supply media data to plugins. Can be written in any language.
 
-## Setup
-
-```sh
-# From repository root
-make setup-providers
-
-# Or from providers/ directory
-cd providers
-make setup              # install all provider dependencies
-make setup-example      # install example provider only
-```
-
-## Running
-
-```sh
-# From repository root (recommended)
-make start-providers    # start all providers
-make stop-providers     # stop all providers
-
-# Or from providers/ directory
-cd providers
-make run-example        # clean, setup, and start (fresh start)
-make start-example      # start example provider (port 4000)
-make stop-example       # stop example provider
-make clean-example      # stop and remove dependencies
-
-# Custom port
-PORT=5000 make start-example
-```
-
 ## Example Provider
 
 Node.js/Express server serving dummy data from JSON fixtures. Template for new providers.
 
 **Endpoints:**
-- `GET /items` - list media items (with pagination)
+- `GET /items` - list media items, with pagination (`page`, `limit`), search (`search`, substring match on title), and sort (`sort=title`, `direction=asc|desc`)
 - `GET /items/:id` - get item details
 
 **Environment:** 

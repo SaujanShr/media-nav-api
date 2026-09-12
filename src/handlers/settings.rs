@@ -29,7 +29,6 @@ fn error_response(err: UserSettingsError) -> HttpResponse {
 
 // ── Handlers ──────────────────────────────────────────────────────────────────
 
-/// `GET /api/settings`
 #[get("")]
 async fn get_settings(state: Data<AppState>, req: HttpRequest) -> impl Responder {
     let claims = assert_ok!(extractor::claims(&req));
@@ -40,7 +39,6 @@ async fn get_settings(state: Data<AppState>, req: HttpRequest) -> impl Responder
         .unwrap_or_else(error_response)
 }
 
-/// `PUT /api/settings`
 #[put("")]
 async fn update_settings(state: Data<AppState>, req: HttpRequest, body: Json<UpdateSettingsRequest>) -> impl Responder {
     let claims = assert_ok!(extractor::claims(&req));

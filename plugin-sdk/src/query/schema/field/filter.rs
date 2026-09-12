@@ -1,7 +1,10 @@
 use std::collections::HashSet;
 
+use serde::{Deserialize, Serialize};
+
 use crate::query::expression::FilterExpression;
 
+#[derive(Serialize, Deserialize)]
 pub struct FilterFieldSchema {
     pub supported:       HashSet<String>,
     pub multiple:        bool,

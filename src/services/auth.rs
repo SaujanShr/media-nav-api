@@ -1,3 +1,5 @@
+use std::sync::OnceLock;
+
 use bcrypt::{hash, verify, DEFAULT_COST};
 use serde::Serialize;
 use sqlx::PgPool;
@@ -7,6 +9,17 @@ use crate::auth::create_token;
 use crate::models::user::User;
 use crate::repositories::user as user_repo;
 use crate::validation::{validate_username, validate_password};
+
+// ── Config ────────────────────────────────────────────────────────────────────
+
+fn dummy_hash() -> &'static str {
+    static HASH: OnceLock<String> = OnceLock::new();
+
+    HASH.get_or_init(|| {
+        hash("placeholder", DEFAULT_COST)
+            .expect("failed to compute dummy bcrypt hash")
+    })
+}
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -57,6 +70,7 @@ pub async fn register(pool: &PgPool, username: &str, password: &str, secret: &st
     }
 
     let id = Uuid::new_v4().to_string();
+    
     let password_hash = hash(password, DEFAULT_COST)
         .map_err(|e| {
             tracing::error!("Bcrypt hash error: {}", e);
@@ -70,7 +84,6 @@ pub async fn register(pool: &PgPool, username: &str, password: &str, secret: &st
             AuthError::Internal
         })?;
 
-    // Create default settings for the new user
     user_repo::create_default_settings(pool, &id)
         .await
         .map_err(|e| {
@@ -95,6 +108,27 @@ pub async fn login(pool: &PgPool, username: &str, password: &str, secret: &str) 
         .map_err(|e| {
             tracing::error!("Database error finding user during login: {}", e);
             AuthError::Internal
+        })?;
+
+    let hash_to_check = match &user {
+        Some(u) => u.password_hash.as_str(),
+        None => dummy_hash(),
+    };
+
+    let password_matches = verify(password, hash_to_check).unwrap_or(false);
+
+    match user {
+        Some(user) if password_matches => build_result(&user, secret),
+        _ => Err(AuthError::InvalidCredentials),
+    }
+}
+
+pub async fn delete(pool: &PgPool, user_id: &str, password: &str) -> Result<(), AuthError> {
+    let user = user_repo::find_by_id(pool, user_id)
+        .await
+        .map_err(|e| {
+            tracing::error!("Database error finding user during account deletion: {}", e);
+            AuthError::Internal
         })?
         .ok_or(AuthError::InvalidCredentials)?;
 
@@ -102,10 +136,6 @@ pub async fn login(pool: &PgPool, username: &str, password: &str, secret: &str) 
         return Err(AuthError::InvalidCredentials);
     }
 
-    build_result(&user, secret)
-}
-
-pub async fn delete(pool: &PgPool, user_id: &str) -> Result<(), AuthError> {
     user_repo::delete(pool, user_id)
         .await
         .map_err(|e| {

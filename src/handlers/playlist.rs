@@ -50,7 +50,6 @@ fn error_response(err: PlaylistError) -> HttpResponse {
 
 // ── Handlers ──────────────────────────────────────────────────────────────────
 
-/// `GET /api/playlists`
 #[get("")]
 async fn list(req: HttpRequest, state: Data<AppState>) -> impl Responder {
     let user_id = assert_ok!(user_id(&req));
@@ -61,7 +60,6 @@ async fn list(req: HttpRequest, state: Data<AppState>) -> impl Responder {
         .unwrap_or_else(error_response)
 }
 
-/// `POST /api/playlists`
 #[post("")]
 async fn create(req: HttpRequest, state: Data<AppState>, body: Json<CreateRequest>) -> impl Responder {
     let user_id = assert_ok!(user_id(&req));
@@ -72,7 +70,6 @@ async fn create(req: HttpRequest, state: Data<AppState>, body: Json<CreateReques
         .unwrap_or_else(error_response)
 }
 
-/// `DELETE /api/playlists/{playlist_id}`
 #[delete("/{playlist_id}")]
 async fn delete(req: HttpRequest, state: Data<AppState>, path: Path<String>) -> impl Responder {
     let playlist_id = path.into_inner();
@@ -84,7 +81,6 @@ async fn delete(req: HttpRequest, state: Data<AppState>, path: Path<String>) -> 
         .unwrap_or_else(error_response)
 }
 
-/// `PATCH /api/playlists/{playlist_id}`
 #[patch("/{playlist_id}")]
 async fn rename(req: HttpRequest, state: Data<AppState>, path: Path<String>, body: Json<RenameRequest>) -> impl Responder {
     let playlist_id = path.into_inner();
@@ -96,7 +92,6 @@ async fn rename(req: HttpRequest, state: Data<AppState>, path: Path<String>, bod
         .unwrap_or_else(error_response)
 }
 
-/// `GET /api/playlists/{playlist_id}/items`
 #[get("/{playlist_id}/items")]
 async fn list_items(req: HttpRequest, state: Data<AppState>, path: Path<String>) -> impl Responder {
     let playlist_id = path.into_inner();
@@ -108,7 +103,6 @@ async fn list_items(req: HttpRequest, state: Data<AppState>, path: Path<String>)
         .unwrap_or_else(error_response)
 }
 
-/// `POST /api/playlists/{playlist_id}/items`
 #[post("/{playlist_id}/items")]
 async fn add_item(
     req: HttpRequest,
@@ -125,7 +119,6 @@ async fn add_item(
         .unwrap_or_else(error_response)
 }
 
-/// `DELETE /api/playlists/{playlist_id}/items/{user_library_item_id}`
 #[delete("/{playlist_id}/items/{user_library_item_id}")]
 async fn remove_item(
     req: HttpRequest,
@@ -141,7 +134,6 @@ async fn remove_item(
         .unwrap_or_else(error_response)
 }
 
-/// `PATCH /api/playlists/{playlist_id}/items/{item_id}`
 #[patch("/{playlist_id}/items/{item_id}")]
 async fn move_item(
     req: HttpRequest,

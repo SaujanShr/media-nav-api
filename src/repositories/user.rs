@@ -15,6 +15,17 @@ pub async fn find_by_username(pool: &PgPool, username: &str) -> Result<Option<Us
         .await
 }
 
+pub async fn find_by_id(pool: &PgPool, user_id: &str) -> Result<Option<User>, Error> {
+    query_as::<_, User>("
+        SELECT   id, username, password_hash, created_at
+        FROM     users
+        WHERE    id = $1
+        ")
+        .bind(user_id)
+        .fetch_optional(pool)
+        .await
+}
+
 pub async fn create(
     pool: &PgPool,
     id: &str,

@@ -1,61 +1,58 @@
-use serde::Serialize;
+use std::fmt;
 
-use crate::library_item::{LibraryItem, LibraryItemDetail};
-use crate::query::{Query, schema::QuerySchema};
+use serde::{Deserialize, Serialize};
 
+use crate::library_item::LibraryItem;
+use crate::query::Query;
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct PluginCallError {
+    pub status:  u16,
+    pub message: String,
+}
+
+impl PluginCallError {
+    pub fn new(status: u16, message: impl Into<String>) -> Self {
+        Self { status, message: message.into() }
+    }
+}
+
+impl fmt::Display for PluginCallError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}: {}", self.status, self.message)
+    }
+}
+
+#[derive(Serialize, Deserialize)]
 pub struct FetchRequest {
     pub page:      u32,
     pub page_size: u32,
     pub query:     Query,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 pub struct FetchResult {
     pub items: Vec<LibraryItem>,
     pub total: u64,
 }
 
-#[derive(Serialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct PluginMetadata {
-    pub name:        &'static str,
-    pub description: &'static str,
+    pub name:        String,
+    pub description: String,
     pub nsfw:        bool,
 }
 
-#[derive(Serialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct PluginResources {
-    pub icon_url:   &'static str,
-    pub banner_url: &'static str,
+    pub icon_url:   String,
+    pub banner_url: String,
 }
 
-/// The universal concrete plugin type.
-///
-/// Every plugin's `create_plugin` entry-point returns a heap-allocated `Plugin`.
-/// The server loads it directly — no custom struct or trait impl needed.
-///
-/// ```rust
-/// #[unsafe(no_mangle)]
-/// pub extern "C" fn create_plugin() -> *mut Plugin {
-///     Box::into_raw(Box::new(Plugin {
-///         id:        "my-plugin",
-///         version:   "1.0.0",
-///         metadata:  PluginMetadata { ... },
-///         resources: PluginResources { ... },
-///         fetch:     my_fetch_fn,
-///         enrich:    my_enrich_fn,
-///     }))
-/// }
-/// ```
-#[derive(Serialize)]
-pub struct Plugin {
-    pub id:        &'static str,
-    pub version:   &'static str,
+#[derive(Clone, Serialize, Deserialize)]
+pub struct PluginInfo {
+    pub id:        String,
+    pub version:   String,
     pub metadata:  PluginMetadata,
     pub resources: PluginResources,
-    #[serde(skip)]
-    pub schema:    fn() -> QuerySchema,
-    #[serde(skip)]
-    pub fetch:     fn(FetchRequest) -> FetchResult,
-    #[serde(skip)]
-    pub enrich:    fn(&str) -> Option<LibraryItemDetail>,
 }

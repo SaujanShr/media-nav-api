@@ -37,8 +37,4 @@ docker-compose.override.yml
 /tmp/*-provider.log
 
 # Plugin build artifacts
-plugins/*.dylib
-plugins/*.so
-plugins/*.dll
-plugins/*.a
-plugins/*.rlib
+plugins/*.wasm

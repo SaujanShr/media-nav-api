@@ -4,16 +4,16 @@ use std::{cmp::Ordering, fmt};
 #[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
 pub enum PartialDate {
-    Year(i32),
-    Month(u32),
-    Day(u32),
-    YearMonth(i32, u32),
-    MonthDay(u32, u32),
-    YearMonthDay(i32, u32, u32),
+    Year(i16),
+    Month(u8),
+    Day(u8),
+    YearMonth(i16, u8),
+    MonthDay(u8, u8),
+    YearMonthDay(i16, u8, u8),
 }
 
 impl PartialDate {
-    pub fn year(&self) -> Option<i32> {
+    pub fn year(&self) -> Option<i16> {
         match self {
             PartialDate::Year(y) => Some(*y),
             PartialDate::Month(_) => None,
@@ -24,7 +24,7 @@ impl PartialDate {
         }
     }
 
-    pub fn month(&self) -> Option<u32> {
+    pub fn month(&self) -> Option<u8> {
         match self {
             PartialDate::Year(_) => None,
             PartialDate::Month(m) => Some(*m),
@@ -35,7 +35,7 @@ impl PartialDate {
         }
     }
 
-    pub fn day(&self) -> Option<u32> {
+    pub fn day(&self) -> Option<u8> {
         match self {
             PartialDate::Year(_) => None,
             PartialDate::Month(_) => None,
@@ -46,14 +46,14 @@ impl PartialDate {
         }
     }
 
-    fn to_ord_tuple(self) -> (i32, u32, u32) {
+    fn to_ord_tuple(self) -> (Option<i16>, Option<u8>, Option<u8>) {
         match self {
-            PartialDate::Year(y) => (y, 1, 1),
-            PartialDate::Month(m) => (0, m, 1),
-            PartialDate::Day(d) => (0, 1, d),
-            PartialDate::YearMonth(y, m) => (y, m, 1),
-            PartialDate::MonthDay(m, d) => (0, m, d),
-            PartialDate::YearMonthDay(y, m, d) => (y, m, d),
+            PartialDate::Year(y) => (Some(y), None, None),
+            PartialDate::Month(m) => (None, Some(m), None),
+            PartialDate::Day(d) => (None, None, Some(d)),
+            PartialDate::YearMonth(y, m) => (Some(y), Some(m), None),
+            PartialDate::MonthDay(m, d) => (None, Some(m), Some(d)),
+            PartialDate::YearMonthDay(y, m, d) => (Some(y), Some(m), Some(d)),
         }
     }
 }

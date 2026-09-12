@@ -33,7 +33,6 @@ fn error_response(err: LibraryItemError) -> HttpResponse {
 
 // ── Handlers ──────────────────────────────────────────────────────────────────
 
-/// `GET /api/library/{user_plugin_id}/items`
 #[get("/{user_plugin_id}/items")]
 async fn list(req: HttpRequest, state: Data<AppState>, path: Path<String>) -> impl Responder {
     let user_plugin_id = path.into_inner();
@@ -45,7 +44,6 @@ async fn list(req: HttpRequest, state: Data<AppState>, path: Path<String>) -> im
         .unwrap_or_else(error_response)
 }
 
-/// `POST /api/library/{user_plugin_id}/items`
 #[post("/{user_plugin_id}/items")]
 async fn add(req: HttpRequest, state: Data<AppState>, path: Path<String>, body: Json<AddRequest>) -> impl Responder {
     let user_plugin_id = path.into_inner();
@@ -57,7 +55,6 @@ async fn add(req: HttpRequest, state: Data<AppState>, path: Path<String>, body: 
         .unwrap_or_else(error_response)
 }
 
-/// `DELETE /api/library/{user_plugin_id}/items/{library_item_id}`
 #[delete("/{user_plugin_id}/items/{library_item_id}")]
 async fn remove(req: HttpRequest, state: Data<AppState>, path: Path<(String, String)>) -> impl Responder {
     let (user_plugin_id, library_item_id) = path.into_inner();

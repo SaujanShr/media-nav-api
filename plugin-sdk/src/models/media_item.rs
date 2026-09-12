@@ -1,19 +1,7 @@
 use serde::{Serialize, Deserialize};
 
-#[derive(Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub enum MediaType {
-    Image,
-    Video,
-    Audio
-}
-
-#[derive(Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub enum CollectionType {
-    Comic,
-    Playlist
-}
+use crate::collection_type::CollectionType;
+use crate::media_type::MediaType;
 
 #[derive(Serialize, Deserialize)]
 pub struct MediaItem {

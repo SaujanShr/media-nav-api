@@ -38,3 +38,6 @@ docker-compose.override.yml
 
 # Plugin build artifacts
 plugins/*.wasm
+
+# Node dependencies
+node_modules/

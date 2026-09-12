@@ -1,17 +1,12 @@
 [
-  {
-    "id": "example-item-1",
-    "title": "Example Item 1",
-    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/c/ce/MrBeast_2023_%28cropped%29.jpg"
-  },
-  {
-    "id": "example-item-2",
-    "title": "Example Item 2",
-    "thumbnail": "https://www.reddit.com/media?url=https%3A%2F%2Fi.redd.it%2Ftd830ud8voqa1.jpg"
-  },
-  {
-    "id": "example-item-3",
-    "title": "Example Item 3",
-    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/4/4a/MrBeast_frontface_2021.png"
-  }
+  { "id": "img-1", "title": "Example Image", "thumbnail": "https://picsum.photos/id/1011/400/300" },
+  { "id": "vid-1", "title": "Example Video", "thumbnail": "https://picsum.photos/id/1015/400/300" },
+  { "id": "aud-1", "title": "Example Audio", "thumbnail": "https://picsum.photos/id/1020/400/300" },
+  { "id": "txt-1", "title": "Example Article", "thumbnail": "https://picsum.photos/id/1025/400/300" },
+  { "id": "comic-1", "title": "Example Comic", "thumbnail": "https://picsum.photos/id/1035/400/300" },
+  { "id": "album-1", "title": "Example Album", "thumbnail": "https://picsum.photos/id/1040/400/300" },
+  { "id": "tv-1", "title": "Example Show", "thumbnail": "https://picsum.photos/id/1050/400/300" },
+  { "id": "movies-1", "title": "Example Movie Series", "thumbnail": "https://picsum.photos/id/1060/400/300" },
+  { "id": "gallery-1", "title": "Example Gallery", "thumbnail": "https://picsum.photos/id/1069/400/300" },
+  { "id": "books-1", "title": "Example Book Series", "thumbnail": "https://picsum.photos/id/1074/400/300" }
 ]

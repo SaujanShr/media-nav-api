@@ -1,53 +1,220 @@
 {
-  "example-item-1": {
-    "id": "example-item-1",
+  "img-1": {
+    "id": "img-1",
     "version": "1.0",
-    "title": "Example Item 1",
-    "subtitle": "A fascinating example",
-    "description": "This is a detailed summary of Example Item 1. It demonstrates how media items can have rich metadata including descriptions, attributes, and various media resources.",
-    "genre": "Example",
+    "title": "Example Image",
+    "subtitle": null,
+    "description": "A single standalone image.",
+    "genre": null,
     "year": 2024,
-    "rating": 5.0,
-    "type_label": null,
-    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/c/ce/MrBeast_2023_%28cropped%29.jpg",
-    "preview_urls": [
-      "https://example.com/preview1.png",
-      "https://example.com/preview2.png"
-    ],
-    "video_urls": ["https://example.com/video1.mp4"],
-    "audio_urls": []
+    "rating": null,
+    "thumbnail": "https://picsum.photos/id/1011/400/300",
+    "kind": "image",
+    "url": "https://picsum.photos/id/1011/800/600"
   },
-  "example-item-2": {
-    "id": "example-item-2",
+  "vid-1": {
+    "id": "vid-1",
     "version": "1.0",
-    "title": "Example Item 2",
-    "subtitle": "Another great example",
-    "description": "This is a detailed summary of Example Item 2. It showcases different types of media and metadata structures.",
+    "title": "Example Video",
+    "subtitle": null,
+    "description": "A single standalone video clip.",
     "genre": "Demo",
     "year": 2024,
-    "rating": 4.8,
-    "type_label": null,
-    "thumbnail": "https://www.reddit.com/media?url=https%3A%2F%2Fi.redd.it%2Ftd830ud8voqa1.jpg",
-    "preview_urls": ["https://example.com/preview3.png"],
-    "video_urls": [
-      "https://example.com/video2-1.mp4",
-      "https://example.com/video2-2.mp4"
-    ],
-    "audio_urls": []
-  },
-  "example-item-3": {
-    "id": "example-item-3",
-    "version": "1.0",
-    "title": "Example Item 3",
-    "subtitle": null,
-    "description": null,
-    "genre": null,
-    "year": null,
     "rating": null,
-    "type_label": "Minimal Example",
-    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/4/4a/MrBeast_frontface_2021.png",
-    "preview_urls": [],
-    "video_urls": [],
-    "audio_urls": ["https://example.com/audio.mp3"]
+    "thumbnail": "https://picsum.photos/id/1015/400/300",
+    "kind": "video",
+    "url": "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"
+  },
+  "aud-1": {
+    "id": "aud-1",
+    "version": "1.0",
+    "title": "Example Audio",
+    "subtitle": null,
+    "description": "A single standalone audio track.",
+    "genre": "Demo",
+    "year": 2024,
+    "rating": null,
+    "thumbnail": "https://picsum.photos/id/1020/400/300",
+    "kind": "audio",
+    "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
+  },
+  "txt-1": {
+    "id": "txt-1",
+    "version": "1.0",
+    "title": "Example Article",
+    "subtitle": "The Tell-Tale Heart",
+    "description": "A single standalone text article.",
+    "genre": null,
+    "year": 2024,
+    "rating": null,
+    "thumbnail": "https://picsum.photos/id/1025/400/300",
+    "kind": "text",
+    "url": "https://www.gutenberg.org/cache/epub/2148/pg2148.txt"
+  },
+  "comic-1": {
+    "id": "comic-1",
+    "version": "1.0",
+    "title": "Example Comic",
+    "subtitle": "A demo comic",
+    "description": "A comic with two volumes of two chapters each.",
+    "genre": "Action",
+    "year": 2024,
+    "rating": 4.5,
+    "thumbnail": "https://picsum.photos/id/1035/400/300",
+    "kind": "comic",
+    "volumes": [
+      {
+        "title": "Volume 1",
+        "chapters": [
+          {
+            "title": "Chapter 1",
+            "pages": [
+              "https://picsum.photos/id/237/800/600",
+              "https://picsum.photos/id/1011/800/600",
+              "https://picsum.photos/id/1015/800/600"
+            ]
+          },
+          {
+            "title": "Chapter 2",
+            "pages": [
+              "https://picsum.photos/id/1020/800/600",
+              "https://picsum.photos/id/1025/800/600",
+              "https://picsum.photos/id/1035/800/600"
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Volume 2",
+        "chapters": [
+          {
+            "title": "Chapter 3",
+            "pages": [
+              "https://picsum.photos/id/1040/800/600",
+              "https://picsum.photos/id/1050/800/600",
+              "https://picsum.photos/id/1060/800/600"
+            ]
+          },
+          {
+            "title": "Chapter 4",
+            "pages": [
+              "https://picsum.photos/id/1069/800/600",
+              "https://picsum.photos/id/1074/800/600",
+              "https://picsum.photos/id/237/800/600"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "album-1": {
+    "id": "album-1",
+    "version": "1.0",
+    "title": "Example Album",
+    "subtitle": "A demo album",
+    "description": "An album with three tracks.",
+    "genre": "Pop",
+    "year": 2024,
+    "rating": 4.0,
+    "thumbnail": "https://picsum.photos/id/1040/400/300",
+    "kind": "album",
+    "tracks": [
+      { "title": "Track 1", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
+      { "title": "Track 2", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" },
+      { "title": "Track 3", "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" }
+    ]
+  },
+  "tv-1": {
+    "id": "tv-1",
+    "version": "1.0",
+    "title": "Example Show",
+    "subtitle": "A demo TV series",
+    "description": "A TV series with two seasons.",
+    "genre": "Drama",
+    "year": 2024,
+    "rating": 4.2,
+    "thumbnail": "https://picsum.photos/id/1050/400/300",
+    "kind": "tv_series",
+    "seasons": [
+      {
+        "title": "Season 1",
+        "episodes": [
+          { "title": "Episode 1", "url": "https://media.w3.org/2010/05/sintel/trailer.mp4" },
+          { "title": "Episode 2", "url": "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/360/Big_Buck_Bunny_360_10s_1MB.mp4" },
+          { "title": "Episode 3", "url": "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/360/Big_Buck_Bunny_360_10s_2MB.mp4" }
+        ]
+      },
+      {
+        "title": "Season 2",
+        "episodes": [
+          { "title": "Episode 1", "url": "https://media.w3.org/2010/05/video/movie_300.webm" },
+          { "title": "Episode 2", "url": "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/360/Big_Buck_Bunny_360_10s_5MB.mp4" }
+        ]
+      }
+    ]
+  },
+  "movies-1": {
+    "id": "movies-1",
+    "version": "1.0",
+    "title": "Example Movie Series",
+    "subtitle": "A demo movie series",
+    "description": "A movie series with three movies.",
+    "genre": "Action",
+    "year": 2024,
+    "rating": 4.1,
+    "thumbnail": "https://picsum.photos/id/1060/400/300",
+    "kind": "movie_series",
+    "movies": [
+      { "title": "Movie 1", "url": "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4" },
+      { "title": "Movie 2", "url": "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" },
+      { "title": "Movie 3", "url": "https://media.w3.org/2010/05/sintel/trailer.mp4" }
+    ]
+  },
+  "gallery-1": {
+    "id": "gallery-1",
+    "version": "1.0",
+    "title": "Example Gallery",
+    "subtitle": "A demo gallery",
+    "description": "A gallery of five images.",
+    "genre": null,
+    "year": 2024,
+    "rating": null,
+    "thumbnail": "https://picsum.photos/id/1069/400/300",
+    "kind": "gallery",
+    "images": [
+      { "title": "Photo 1", "url": "https://picsum.photos/id/1011/800/600" },
+      { "title": "Photo 2", "url": "https://picsum.photos/id/1015/800/600" },
+      { "title": "Photo 3", "url": "https://picsum.photos/id/1020/800/600" },
+      { "title": "Photo 4", "url": "https://picsum.photos/id/1025/800/600" },
+      { "title": "Photo 5", "url": "https://picsum.photos/id/1035/800/600" }
+    ]
+  },
+  "books-1": {
+    "id": "books-1",
+    "version": "1.0",
+    "title": "Example Book Series",
+    "subtitle": "A demo book series",
+    "description": "A book series with two volumes of two chapters each.",
+    "genre": "Fantasy",
+    "year": 2024,
+    "rating": 4.8,
+    "thumbnail": "https://picsum.photos/id/1074/400/300",
+    "kind": "book_series",
+    "volumes": [
+      {
+        "title": "Volume 1",
+        "chapters": [
+          { "title": "Alice's Adventures in Wonderland", "url": "https://www.gutenberg.org/cache/epub/11/pg11.txt" },
+          { "title": "The Adventures of Sherlock Holmes", "url": "https://www.gutenberg.org/cache/epub/1661/pg1661.txt" }
+        ]
+      },
+      {
+        "title": "Volume 2",
+        "chapters": [
+          { "title": "Dracula", "url": "https://www.gutenberg.org/cache/epub/345/pg345.txt" },
+          { "title": "Frankenstein", "url": "https://www.gutenberg.org/cache/epub/84/pg84.txt" }
+        ]
+      }
+    ]
   }
 }

@@ -77,7 +77,49 @@ pub async fn list_items(pool: &PgPool, playlist_id: &str) -> Result<Vec<Playlist
         .await
 }
 
-/// Returns the `user_id` that owns the given `user_library_item` (via user_plugins).
+pub async fn item_exists(pool: &PgPool, playlist_id: &str, item_id: &str) -> Result<bool, Error> {
+    query_scalar::<_, bool>("
+        SELECT EXISTS(
+            SELECT 1 FROM user_playlist_items
+            WHERE  id = $1 AND playlist_id = $2
+        )
+        ")
+        .bind(item_id)
+        .bind(playlist_id)
+        .fetch_one(pool)
+        .await
+}
+
+pub async fn count_items(pool: &PgPool, playlist_id: &str) -> Result<i64, Error> {
+    query_scalar("
+        SELECT COUNT(*) FROM user_playlist_items
+        WHERE  playlist_id = $1
+        ")
+        .bind(playlist_id)
+        .fetch_one(pool)
+        .await
+}
+
+pub async fn neighbor_indices(
+    pool: &PgPool,
+    playlist_id: &str,
+    item_id: &str,
+    offset: i64,
+) -> Result<Vec<f64>, Error> {
+    query_scalar("
+        SELECT   index FROM user_playlist_items
+        WHERE    playlist_id = $1 AND id != $2
+        ORDER BY index
+        OFFSET   $3
+        LIMIT    2
+        ")
+        .bind(playlist_id)
+        .bind(item_id)
+        .bind(offset)
+        .fetch_all(pool)
+        .await
+}
+
 pub async fn find_library_item_user(pool: &PgPool, user_library_item_id: &str) -> Result<Option<String>, Error> {
     query_scalar::<_, String>("
         SELECT up.user_id
@@ -163,20 +205,15 @@ pub async fn update_item_index(
         .await
 }
 
-/// Bulk-updates `(item_id, new_index)` pairs in a single transaction.
-/// Used during re-normalization when float gaps get too small.
-/// Locks the playlist to prevent concurrent modifications.
 pub async fn set_item_indices(pool: &PgPool, updates: Vec<(String, f64)>) -> Result<(), Error> {
-    if updates.is_empty() {
+    let Some((first_item_id, _)) = updates.first() else {
         return Ok(());
-    }
+    };
 
     let mut tx = pool.begin().await?;
 
-    let playlist_id: String = query_scalar(
-        "SELECT playlist_id FROM user_playlist_items WHERE id = $1"
-    )
-        .bind(&updates[0].0)
+    let playlist_id: String = query_scalar("SELECT playlist_id FROM user_playlist_items WHERE id = $1")
+        .bind(first_item_id)
         .fetch_one(&mut *tx)
         .await?;
 
@@ -185,13 +222,18 @@ pub async fn set_item_indices(pool: &PgPool, updates: Vec<(String, f64)>) -> Res
         .execute(&mut *tx)
         .await?;
 
-    for (id, index) in updates {
-        query("UPDATE user_playlist_items SET index = $2 WHERE id = $1")
-            .bind(id)
-            .bind(index)
-            .execute(&mut *tx)
-            .await?;
-    }
+    let (ids, indices): (Vec<String>, Vec<f64>) = updates.into_iter().unzip();
+
+    query("
+        UPDATE user_playlist_items AS t
+        SET    index = u.index
+        FROM   UNNEST($1::text[], $2::float8[]) AS u(id, index)
+        WHERE  t.id = u.id
+        ")
+        .bind(ids)
+        .bind(indices)
+        .execute(&mut *tx)
+        .await?;
 
     tx.commit().await
 }

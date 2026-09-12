@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::query::expression::{SortDirection, SortExpression, SortOption};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct SortFieldSchema {
     pub supported:         Vec<SortOption>,
     pub default_sort:      String,

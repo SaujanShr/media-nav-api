@@ -7,7 +7,7 @@ use crate::query::schema::{
 };
 use crate::query::Query;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum QueryFieldSchema {
     Search(SearchFieldSchema),

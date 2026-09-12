@@ -70,6 +70,7 @@ JWT_SECRET=your-secret-key-here-min-32-chars
 PLUGINS_DIR=./plugins
 HOST=127.0.0.1
 PORT=8080
+DB_MAX_CONNECTIONS=20
 ```
 
 **Important:** Change `JWT_SECRET` to a secure random string (minimum 32 characters):

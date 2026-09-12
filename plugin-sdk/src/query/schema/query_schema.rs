@@ -20,7 +20,7 @@ impl QueryValidationError {
 
 // ── Schema ────────────────────────────────────────────────────────────────────
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct QuerySchema {
     pub fields: HashMap<String, QueryFieldSchema>,
 }

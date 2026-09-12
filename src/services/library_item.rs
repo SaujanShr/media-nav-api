@@ -44,6 +44,7 @@ pub async fn add(pool: &PgPool, user_plugin_id: &str, user_id: &str, library_ite
     resolve_plugin(pool, user_plugin_id, user_id).await?;
 
     let id = Uuid::new_v4().to_string();
+    
     library_item_repo::add(pool, &id, user_plugin_id, library_item_id)
         .await
         .map_err(|e|
@@ -58,6 +59,7 @@ pub async fn remove(pool: &PgPool, user_plugin_id: &str, user_id: &str, library_
     let deleted = library_item_repo::remove(pool, user_plugin_id, library_item_id)
         .await
         .map_err(|_| LibraryItemError::Internal)?;
+
     if !deleted {
         return Err(LibraryItemError::NotFound);
     }

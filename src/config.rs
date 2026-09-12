@@ -4,6 +4,7 @@ pub struct Config {
     pub plugins_dir: String,
     pub host: String,
     pub port: u16,
+    pub db_max_connections: u32,
 }
 
 impl Config {
@@ -21,6 +22,10 @@ impl Config {
                 .expect("PORT must be set in the environment or .env file")
                 .parse()
                 .expect("PORT must be a valid number"),
+            db_max_connections: std::env::var("DB_MAX_CONNECTIONS")
+                .expect("DB_MAX_CONNECTIONS must be set in the environment or .env file")
+                .parse()
+                .expect("DB_MAX_CONNECTIONS must be a valid number"),
         }
     }
 }

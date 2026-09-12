@@ -26,15 +26,15 @@ pub async fn bearer_validator(
     req: ServiceRequest,
     creds: BearerAuth,
 ) -> Result<ServiceRequest, (Error, ServiceRequest)> {
-    let secret = match req.app_data::<Data<AppState>>() {
-        Some(state) => &state.jwt_secret,
+    let state = match req.app_data::<Data<AppState>>() {
+        Some(state) => state,
         None => {
             let error = AuthenticationError::new(Bearer::default());
             return Err((error.into(), req));
         }
     };
 
-    match validate_token(creds.token(), secret) {
+    match validate_token(creds.token(), &state.jwt_decoding_key, &state.jwt_validation) {
         Ok(claims) => {
             req.extensions_mut().insert(claims);
             Ok(req)

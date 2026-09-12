@@ -9,20 +9,20 @@ pub enum SortDirection {
     Desc,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct SortOption {
     pub sort:       String,
     pub ascending:  bool,
     pub descending: bool,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct SortExpression {
     pub sort:      String,
     pub direction: SortDirection,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct FilterExpression {
     #[serde(default)]
     pub include: HashSet<String>,

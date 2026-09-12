@@ -30,11 +30,14 @@ PORT=5000 npm start    # custom port
 {"status": "ok", "provider": "example"}
 ```
 
-**`GET /items?page=1&limit=10`**
+**`GET /items?page=1&limit=10&search=foo&sort=title&direction=asc`**
+
+`search` matches substrings of `title` (case-insensitive); `sort=title` with `direction=asc|desc` sorts the results.
+
 ```json
 {
   "items": [
-    {"id": "example-item-1", "title": "Example Item 1", "thumbnail_url": "..."}
+    {"id": "example-item-1", "title": "Example Item 1", "thumbnail": "..."}
   ],
   "total": 3,
   "page": 1,
@@ -43,12 +46,24 @@ PORT=5000 npm start    # custom port
 ```
 
 **`GET /items/:id`**
+
+A flat object — plugins are responsible for transforming this into the API's `LibraryItemDetail` shape (see `plugins/example/src/enrich.rs`).
+
 ```json
 {
   "id": "example-item-1",
   "version": "1.0",
-  "metadata": {"title": "...", "subtitle": "...", "summary": "...", "attributes": [...]},
-  "resources": {"thumbnail": "...", "preview": [...], "media": {...}}
+  "title": "...",
+  "subtitle": "...",
+  "description": "...",
+  "genre": "...",
+  "year": 2024,
+  "rating": 5.0,
+  "type_label": null,
+  "thumbnail": "...",
+  "preview_urls": ["..."],
+  "video_urls": ["..."],
+  "audio_urls": []
 }
 ```
 

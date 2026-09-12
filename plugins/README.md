@@ -2,7 +2,7 @@
 
 Sandboxed WebAssembly modules that extend the API with new content sources. Each plugin provides
 a query schema, fetch logic, and enrichment for media items, and runs through `extism`/`wasmtime` —
-not `dlopen`'d native code. The host talks to a plugin entirely over JSON via three exports:
+not `dlopen`'d native code. The host talks to a plugin entirely over JSON via four exports:
 `plugin_info`, `schema`, `fetch`, and `enrich`.
 
 ## Creating a Plugin
@@ -22,7 +22,7 @@ not `dlopen`'d native code. The host talks to a plugin entirely over JSON via th
    crate-type = ["cdylib"]
 
    [dependencies]
-   plugin-sdk = { path = "../../plugin-sdk" }
+   plugin-sdk = { path = "../../plugin-sdk", features = ["guest"] }
    extism-pdk = "1.4"
    serde = { version = "1.0", features = ["derive"] }
    ```
@@ -47,14 +47,14 @@ not `dlopen`'d native code. The host talks to a plugin entirely over JSON via th
    pub fn schema() -> FnResult<Json<QuerySchema>> { /* declare queryable fields */ }
 
    #[plugin_fn]
-   pub fn fetch(req: Json<plugin_sdk::plugin::FetchRequest>) -> FnResult<Json<plugin_sdk::plugin::FetchResult>> { /* ... */ }
+   pub fn fetch(req: Json<plugin_sdk::plugin::FetchRequest>) -> FnResult<Json<Result<plugin_sdk::plugin::FetchResult, plugin_sdk::plugin::PluginCallError>>> { /* ... */ }
 
    #[plugin_fn]
-   pub fn enrich(id: Json<String>) -> FnResult<Json<Option<plugin_sdk::library_item::LibraryItemDetail>>> { /* ... */ }
+   pub fn enrich(id: Json<String>) -> FnResult<Json<Result<Option<plugin_sdk::library_item::LibraryItemDetail>, plugin_sdk::plugin::PluginCallError>>> { /* ... */ }
    ```
 
 4. **Network access is denied by default.** A plugin can only reach hosts listed in
-   `ALLOWED_HOSTS` in `src/plugins/mod.rs` on the host side, via `extism_pdk::http::request` —
+   `ALLOWED_HOSTS` in `src/plugins/wasm.rs` on the host side, via `extism_pdk::http::request` —
    there's no raw socket access. Add your provider's host there if it isn't already covered.
 
 5. **Update `plugins/Makefile`** to add build/install targets for your plugin (follow the

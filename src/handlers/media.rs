@@ -1,7 +1,10 @@
+use std::sync::OnceLock;
+
 use actix_web::{get, post, HttpResponse, Responder};
 use actix_web::http::StatusCode;
 use actix_web::web::{Data, Json, Path, Query, ServiceConfig, scope};
-use actix_governor::{Governor, GovernorConfigBuilder};
+use actix_governor::governor::middleware::NoOpMiddleware;
+use actix_governor::{Governor, GovernorConfig, GovernorConfigBuilder, PeerIpKeyExtractor};
 use serde::Deserialize;
 use serde_json::json;
 
@@ -14,6 +17,17 @@ use crate::state::AppState;
 // ── Config ────────────────────────────────────────────────────────────────────
 
 const REQUESTS_PER_MINUTE: u64 = 60;
+
+fn governor_conf() -> &'static GovernorConfig<PeerIpKeyExtractor, NoOpMiddleware> {
+    static CONF: OnceLock<GovernorConfig<PeerIpKeyExtractor, NoOpMiddleware>> = OnceLock::new();
+
+    CONF.get_or_init(|| {
+        GovernorConfigBuilder::default()
+            .requests_per_minute(REQUESTS_PER_MINUTE)
+            .finish()
+            .unwrap()
+    })
+}
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -93,14 +107,9 @@ async fn enrich(
 // ── Public ────────────────────────────────────────────────────────────────────
 
 pub fn public_routes(cfg: &mut ServiceConfig) {
-    let governor_conf = GovernorConfigBuilder::default()
-        .requests_per_minute(REQUESTS_PER_MINUTE)
-        .finish()
-        .unwrap();
-
     cfg.service(
         scope("/media")
-            .wrap(Governor::new(&governor_conf))
+            .wrap(Governor::new(governor_conf()))
             .service(schema)
             .service(fetch)
             .service(enrich),

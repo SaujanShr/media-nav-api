@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use actix_web::web;
 
 use plugin_sdk::library_item::LibraryItemDetail;
@@ -21,7 +19,7 @@ fn as_internal<T>(result: Result<T, wasm::CallError>) -> Result<T, PluginError> 
 
 // ── Public ────────────────────────────────────────────────────────────────────
 
-pub fn schema(registry: &PluginRegistry, plugin_id: &str) -> Result<Arc<QuerySchema>, PluginError> {
+pub fn schema(registry: &PluginRegistry, plugin_id: &str) -> Result<QuerySchema, PluginError> {
     Ok(registry.get(plugin_id).ok_or(PluginError::NotFound)?.schema.clone())
 }
 
@@ -40,13 +38,14 @@ pub async fn fetch(
             .map(|e| format!("{}: {}", e.field, e.message))
             .collect::<Vec<_>>()
             .join("; ");
+        
         PluginError::ValidationError(message)
     })?;
 
-    let wasm_bytes = plugin.wasm.clone();
+    let pool = plugin.pool.clone();
     let request = FetchRequest { page, page_size, query };
 
-    let call_result = web::block(move || wasm::fetch(&wasm_bytes, &request))
+    let call_result = web::block(move || wasm::fetch(&pool, &request))
         .await
         .map_err(|e| {
             tracing::error!("Plugin fetch task panicked: {}", e);
@@ -61,15 +60,15 @@ pub async fn enrich(
     plugin_id: &str,
     item_id: &str,
 ) -> Result<Option<LibraryItemDetail>, PluginError> {
-    let wasm_bytes = registry
+    let pool = registry
         .get(plugin_id)
         .ok_or(PluginError::NotFound)?
-        .wasm
+        .pool
         .clone();
-    
+
     let item_id = item_id.to_string();
 
-    let call_result = web::block(move || wasm::enrich(&wasm_bytes, &item_id))
+    let call_result = web::block(move || wasm::enrich(&pool, &item_id))
         .await
         .map_err(|e| {
             tracing::error!("Plugin enrich task panicked: {}", e);

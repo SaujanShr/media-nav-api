@@ -53,7 +53,7 @@ Docker Compose automatically merges `docker-compose.override.yml` with `docker-c
 ## Architecture
 
 - **Server:** Rust/Actix-Web API with PostgreSQL database
-- **Plugins:** Dynamic Rust libraries that extend content sources ([plugins/README.md](plugins/README.md))
+- **Plugins:** Sandboxed WASM modules that extend content sources ([plugins/README.md](plugins/README.md))
 - **Providers:** Standalone HTTP servers supplying media data ([providers/README.md](providers/README.md))
 - **Database:** PostgreSQL 16 in Docker (port 5433 by default to avoid conflicts)
 

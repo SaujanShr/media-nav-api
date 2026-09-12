@@ -37,14 +37,16 @@ pub fn create_token(user_id: &str, secret: &str) -> Result<String, Error> {
     )
 }
 
-pub fn validate_token(token: &str, secret: &str) -> Result<Claims, Error> {
-    let decoding_key = DecodingKey::from_secret(secret.as_bytes());
+pub fn decoding_key(secret: &str) -> DecodingKey {
+    DecodingKey::from_secret(secret.as_bytes())
+}
+
+pub fn validation() -> Validation {
     let mut validation = Validation::new(Algorithm::HS512);
     validation.validate_exp = true;
+    validation
+}
 
-    decode::<Claims>(
-        token,
-        &decoding_key,
-        &validation
-    ).map(|data| data.claims)
+pub fn validate_token(token: &str, decoding_key: &DecodingKey, validation: &Validation) -> Result<Claims, Error> {
+    decode::<Claims>(token, decoding_key, validation).map(|data| data.claims)
 }

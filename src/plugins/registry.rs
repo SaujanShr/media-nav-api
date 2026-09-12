@@ -1,14 +1,14 @@
 use std::collections::HashMap;
 use std::path::Path;
-use std::sync::Arc;
 use std::fmt;
 use std::io;
 use std::fs;
 
+use extism::Pool;
 use plugin_sdk::plugin::PluginInfo;
 use plugin_sdk::query::schema::QuerySchema;
 
-use super::wasm::{self, CallError};
+use super::wasm::{self, CallError, CompileError};
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
@@ -18,20 +18,25 @@ const WASM_EXTENSION: &str = "wasm";
 
 pub enum RegistryError {
     Io(io::Error),
+    Compile(CompileError),
     Call(CallError),
 }
 
 impl fmt::Display for RegistryError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            RegistryError::Io(e)   => write!(f, "IO error: {e}"),
-            RegistryError::Call(e) => write!(f, "Failed to load plugin: {e}"),
+            RegistryError::Io(e)      => write!(f, "IO error: {e}"),
+            RegistryError::Compile(e) => write!(f, "{e}"),
+            RegistryError::Call(e)    => write!(f, "Failed to load plugin: {e}"),
         }
     }
 }
 
 impl From<io::Error> for RegistryError {
     fn from(e: io::Error) -> Self { RegistryError::Io(e) }
+}
+impl From<CompileError> for RegistryError {
+    fn from(e: CompileError) -> Self { RegistryError::Compile(e) }
 }
 impl From<CallError> for RegistryError {
     fn from(e: CallError) -> Self { RegistryError::Call(e) }
@@ -40,8 +45,8 @@ impl From<CallError> for RegistryError {
 #[derive(Clone)]
 pub struct Plugin {
     pub info:   PluginInfo,
-    pub schema: Arc<QuerySchema>,
-    pub wasm:   Arc<Vec<u8>>,
+    pub schema: QuerySchema,
+    pub pool:   Pool,
 }
 
 // ── Registry ──────────────────────────────────────────────────────────────────
@@ -107,9 +112,10 @@ impl PluginRegistry {
 
     fn load(path: &Path) -> Result<Plugin, RegistryError> {
         let wasm_bytes = fs::read(path)?;
-        let info = wasm::plugin_info(&wasm_bytes)?;
-        let schema = wasm::schema(&wasm_bytes)?;
+        let pool = wasm::compile(&wasm_bytes)?;
+        let info = wasm::plugin_info(&pool)?;
+        let schema = wasm::schema(&pool)?;
 
-        Ok(Plugin { info, schema: Arc::new(schema), wasm: Arc::new(wasm_bytes) })
+        Ok(Plugin { info, schema, pool })
     }
 }

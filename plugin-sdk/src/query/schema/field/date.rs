@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::partial_date::PartialDate;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct DateFieldSchema {
     pub variant:       PartialDate,
     pub min:           Option<PartialDate>,

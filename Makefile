@@ -44,7 +44,7 @@ logs: ## Show logs from all services
 
 # ── Plugins ────────────────────────────────────────────────────────────────────
 
-build-plugins: ## Build and install all plugin dylibs
+build-plugins: ## Build and install all plugin wasm modules
 	$(MAKE) -C plugins build install
 
 clean-plugins: ## Remove installed plugins

@@ -23,8 +23,8 @@ use plugins::PluginRegistry;
 use state::AppState;
 
 
-async fn init_db(database_url: &str) -> PgPool {
-    let pool = db::create_pool(database_url)
+async fn init_db(database_url: &str, max_connections: u32) -> PgPool {
+    let pool = db::create_pool(database_url, max_connections)
         .await
         .expect("Failed to connect to PostgreSQL");
 
@@ -78,7 +78,7 @@ async fn main() -> std::io::Result<()> {
         .init();
 
     let config = Config::from_env();
-    let pool = init_db(&config.database_url).await;
+    let pool = init_db(&config.database_url, config.db_max_connections).await;
     let plugins = PluginRegistry::load_from_dir(Path::new(&config.plugins_dir));
 
     let host = config.host.clone();

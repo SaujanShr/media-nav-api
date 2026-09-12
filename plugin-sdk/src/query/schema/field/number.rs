@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct NumberFieldSchema {
     pub min:            Option<f32>,
     pub max:            Option<f32>,

@@ -1,9 +1,12 @@
+use std::sync::OnceLock;
+
 use actix_web::{
     delete, get, post, Responder,
     HttpRequest, HttpResponse
 };
 use actix_web::web::{Data, Json, ServiceConfig, scope};
-use actix_governor::{Governor, GovernorConfigBuilder};
+use actix_governor::governor::middleware::NoOpMiddleware;
+use actix_governor::{Governor, GovernorConfig, GovernorConfigBuilder, PeerIpKeyExtractor};
 use serde::Deserialize;
 use serde_json::json;
 
@@ -14,6 +17,17 @@ use crate::state::AppState;
 // ── Config ────────────────────────────────────────────────────────────────────
 
 const REQUESTS_PER_MINUTE: u64 = 10;
+
+fn governor_conf() -> &'static GovernorConfig<PeerIpKeyExtractor, NoOpMiddleware> {
+    static CONF: OnceLock<GovernorConfig<PeerIpKeyExtractor, NoOpMiddleware>> = OnceLock::new();
+
+    CONF.get_or_init(|| {
+        GovernorConfigBuilder::default()
+            .requests_per_minute(REQUESTS_PER_MINUTE)
+            .finish()
+            .unwrap()
+    })
+}
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -80,14 +94,9 @@ async fn delete(req: HttpRequest, state: Data<AppState>, body: Json<DeleteAccoun
 // ── Public ────────────────────────────────────────────────────────────────────
 
 pub fn public_routes(cfg: &mut ServiceConfig) {
-    let governor_conf = GovernorConfigBuilder::default()
-        .requests_per_minute(REQUESTS_PER_MINUTE)
-        .finish()
-        .unwrap();
-
     cfg.service(
         scope("/account")
-            .wrap(Governor::new(&governor_conf))
+            .wrap(Governor::new(governor_conf()))
             .service(register)
             .service(login),
     );

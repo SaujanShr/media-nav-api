@@ -66,10 +66,16 @@ pub async fn create_default_settings(pool: &PgPool, user_id: &str) -> Result<(),
     Ok(())
 }
 
-pub async fn update_settings(pool: &PgPool, user_id: &str, nsfw_enabled: bool, theme: &Theme) -> Result<UserSettings, Error> {
+pub async fn update_settings(
+    pool: &PgPool,
+    user_id: &str,
+    nsfw_enabled: Option<bool>,
+    theme: Option<&Theme>,
+) -> Result<UserSettings, Error> {
     query_as::<_, UserSettings>("
         UPDATE user_settings
-        SET    nsfw_enabled = $2, theme = $3
+        SET    nsfw_enabled = COALESCE($2, nsfw_enabled),
+               theme        = COALESCE($3, theme)
         WHERE  user_id = $1
         RETURNING user_id, nsfw_enabled, theme
         ")

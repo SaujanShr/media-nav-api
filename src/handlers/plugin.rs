@@ -8,6 +8,10 @@ use crate::auth::user_id;
 use crate::services::plugin::{self as plugin_service, PluginError};
 use crate::state::AppState;
 
+#[cfg(test)]
+#[path = "tests/plugin.rs"]
+mod tests;
+
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 #[derive(Deserialize)]

@@ -4,7 +4,8 @@
   "description": "Example media provider server for media-nav",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node --test"
   },
   "keywords": ["media", "provider", "example"],
   "author": "",

@@ -7,6 +7,10 @@ use crate::query::schema::{
 };
 use crate::query::Query;
 
+#[cfg(test)]
+#[path = "tests/query_field_schema.rs"]
+mod tests;
+
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum QueryFieldSchema {

@@ -6,6 +6,10 @@ use crate::repositories::playlist as playlist_repo;
 use crate::validation::validate_playlist_name;
 use super::is_duplicate_key;
 
+#[cfg(test)]
+#[path = "tests/playlist.rs"]
+mod tests;
+
 // ── Config ────────────────────────────────────────────────────────────────────
 
 const INDEX_GAP_THRESHOLD: f64 = 1e-9;

@@ -1,5 +1,9 @@
 use serde::{Deserialize, Serialize};
 
+#[cfg(test)]
+#[path = "tests/search.rs"]
+mod tests;
+
 #[derive(Clone, Serialize, Deserialize)]
 pub struct SearchFieldSchema {
     pub required:   bool,

@@ -1,3 +1,7 @@
+#[cfg(test)]
+#[path = "tests/validation.rs"]
+mod tests;
+
 pub const USERNAME_MIN_LENGTH: usize = 3;
 pub const USERNAME_MAX_LENGTH: usize = 50;
 pub const PASSWORD_MIN_LENGTH: usize = 8;

@@ -4,6 +4,10 @@ use serde::{Deserialize, Serialize};
 
 use crate::query::expression::FilterExpression;
 
+#[cfg(test)]
+#[path = "tests/filter.rs"]
+mod tests;
+
 #[derive(Clone, Serialize, Deserialize)]
 pub struct FilterFieldSchema {
     pub supported:       HashSet<String>,

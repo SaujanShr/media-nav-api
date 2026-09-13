@@ -324,11 +324,20 @@ make db-reset
 
 **Note:** Migrations are managed by sqlx and run automatically when the Rust server starts. The `_sqlx_migrations` table tracks which migrations have been applied.
 
+## Testing
+
+```sh
+make test
+```
+
+Runs every test suite (plugin-sdk, plugins, server, providers). See [TESTING.md](TESTING.md) for
+layout, per-area commands, and coverage details.
+
 ## Next Steps
 
 - **Add a plugin:** See [plugins/README.md](plugins/README.md)
 - **Add a provider:** See [providers/README.md](providers/README.md)
-- **Run tests:** `cargo test`
+- **Add tests:** See [TESTING.md](TESTING.md)
 
 ## Getting Help
 

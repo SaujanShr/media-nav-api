@@ -8,6 +8,10 @@ use crate::models::user::Theme;
 use crate::services::user::{self as user_settings_service, UserSettingsError};
 use crate::state::AppState;
 
+#[cfg(test)]
+#[path = "tests/settings.rs"]
+mod tests;
+
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 #[derive(Deserialize)]

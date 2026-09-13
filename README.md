@@ -68,6 +68,15 @@ Once everything is running, try the demo script:
 
 This demonstrates the full flow: register → login → fetch → enrich → get media.
 
+## Testing
+
+```sh
+make test
+```
+
+Runs every test suite (plugin-sdk, plugins, server, providers). See [TESTING.md](TESTING.md) for
+layout, per-area commands, and coverage details.
+
 ## Troubleshooting
 
 ### Port 5432 already in use
@@ -115,3 +124,5 @@ make stop-providers && make start-providers
 **Add a plugin:** Create a standalone crate under `plugins/` targeting `wasm32-wasip1`, following the `example` plugin structure. See [plugins/README.md](plugins/README.md).
 
 **Add a provider:** Create a subdirectory under `providers/` with HTTP endpoints. Add targets to `providers/Makefile`. See [providers/README.md](providers/README.md).
+
+**Add tests:** See [TESTING.md](TESTING.md) for the test layout and conventions.

@@ -5,6 +5,10 @@ use serde::{Deserialize, Serialize};
 use crate::query::schema::QueryFieldSchema;
 use crate::query::Query;
 
+#[cfg(test)]
+#[path = "tests/query_schema.rs"]
+mod tests;
+
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 pub struct QueryValidationError {

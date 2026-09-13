@@ -1,5 +1,9 @@
 use serde::{Deserialize, Serialize};
 
+#[cfg(test)]
+#[path = "tests/number.rs"]
+mod tests;
+
 #[derive(Clone, Serialize, Deserialize)]
 pub struct NumberFieldSchema {
     pub min:            Option<f32>,

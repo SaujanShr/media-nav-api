@@ -7,6 +7,10 @@ use plugin_sdk::plugin::PluginCallError;
 use plugin_sdk::push_attr;
 use serde::Deserialize;
 
+#[cfg(test)]
+#[path = "tests/enrich.rs"]
+mod tests;
+
 const PROVIDER_URL: &str = "http://localhost:4000";
 
 // ── Raw shapes ────────────────────────────────────────────────────────────────

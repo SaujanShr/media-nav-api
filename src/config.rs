@@ -1,3 +1,7 @@
+#[cfg(test)]
+#[path = "tests/config.rs"]
+mod tests;
+
 pub struct Config {
     pub database_url: String,
     pub jwt_secret: String,

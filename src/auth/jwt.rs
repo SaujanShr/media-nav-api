@@ -4,6 +4,10 @@ use jsonwebtoken::{
 };
 use serde::{Deserialize, Serialize};
 
+#[cfg(test)]
+#[path = "tests/jwt.rs"]
+mod tests;
+
 // ── Config ────────────────────────────────────────────────────────────────────
 
 const TOKEN_EXPIRY_SECS: u64 = 24 * 60 * 60;

@@ -5,6 +5,10 @@ use serde::{Deserialize, Serialize};
 use crate::library_item::LibraryItem;
 use crate::query::Query;
 
+#[cfg(test)]
+#[path = "tests/plugin.rs"]
+mod tests;
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PluginCallError {
     pub status:  u16,

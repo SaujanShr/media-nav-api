@@ -7,6 +7,10 @@ use crate::auth::user_id;
 use crate::services::playlist::{self as playlist_service, PlaylistError};
 use crate::state::AppState;
 
+#[cfg(test)]
+#[path = "tests/playlist.rs"]
+mod tests;
+
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 #[derive(Deserialize)]

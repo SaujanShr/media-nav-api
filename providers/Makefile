@@ -4,7 +4,8 @@ EXAMPLE_LOG  := /tmp/example-provider.log
 NPM          := npm --registry https://registry.npmjs.org
 
 .PHONY: help setup setup-example install-example \
-        start-example stop-example run-example run clean-example clean
+        start-example stop-example run-example run clean-example clean \
+        test test-example
 
 help: ## Show this help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -52,6 +53,13 @@ stop-example: ## Stop the example provider server
 		echo "→ example provider is not running"; \
 		rm -f $(EXAMPLE_PID); \
 	fi
+
+# ── Test ───────────────────────────────────────────────────────────────────────
+
+test: test-example ## Run all provider test suites
+
+test-example: setup-example ## Run example provider tests
+	cd $(EXAMPLE_DIR) && npm test
 
 # ── Maintenance ────────────────────────────────────────────────────────────────
 

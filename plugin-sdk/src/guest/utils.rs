@@ -1,3 +1,7 @@
+#[cfg(test)]
+#[path = "tests/utils.rs"]
+mod tests;
+
 #[macro_export]
 macro_rules! push_attr {
     ($attrs:expr, $label:expr, $opt:expr) => {

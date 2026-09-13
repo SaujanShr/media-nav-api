@@ -4,6 +4,7 @@ CARGO := $(HOME)/.cargo/bin/cargo
         build-plugins build-providers build-server \
         setup-providers start-providers stop-providers \
         clean-plugins clean-providers clean-server \
+        test test-plugin-sdk test-plugins test-server test-providers \
         db-start db-stop db-reset db-logs db-shell db-clean
 
 help: ## Show this help message
@@ -76,6 +77,22 @@ clean-server: ## Remove Rust build artifacts
 	@echo "→ Killing any running server on port 8080..."
 	@lsof -ti:8080 | xargs kill -9 2>/dev/null || echo "  ✓ No server running on port 8080"
 	cargo clean
+
+# ── Tests ──────────────────────────────────────────────────────────────────────
+
+test: test-plugin-sdk test-plugins test-server test-providers ## Run every test suite (plugin-sdk, plugins, server, providers)
+
+test-plugin-sdk: ## Run plugin-sdk unit tests
+	cd plugin-sdk && $(CARGO) test --features guest
+
+test-plugins: ## Run plugin (wasm guest) unit tests
+	$(MAKE) -C plugins test
+
+test-server: ## Run the main server's unit tests
+	$(CARGO) test --package media-nav-api
+
+test-providers: ## Run provider test suites
+	$(MAKE) -C providers test
 
 # ── Database ───────────────────────────────────────────────────────────────────
 

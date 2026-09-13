@@ -2,6 +2,10 @@ use serde::{Deserialize, Serialize};
 
 use crate::query::expression::{SortDirection, SortExpression, SortOption};
 
+#[cfg(test)]
+#[path = "tests/sort.rs"]
+mod tests;
+
 #[derive(Clone, Serialize, Deserialize)]
 pub struct SortFieldSchema {
     pub supported:         Vec<SortOption>,

@@ -9,6 +9,10 @@ use actix_web_httpauth::headers::www_authenticate::bearer::Bearer;
 use crate::auth::{validate_token, Claims};
 use crate::state::AppState;
 
+#[cfg(test)]
+#[path = "tests/extractor.rs"]
+mod tests;
+
 // ── Public ────────────────────────────────────────────────────────────────────
 
 pub fn claims(req: &HttpRequest) -> Result<Claims, Error> {

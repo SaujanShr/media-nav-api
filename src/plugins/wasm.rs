@@ -9,6 +9,10 @@ use plugin_sdk::library_item::LibraryItemDetail;
 use plugin_sdk::plugin::{FetchRequest, FetchResult, PluginCallError, PluginInfo};
 use plugin_sdk::query::schema::QuerySchema;
 
+#[cfg(test)]
+#[path = "tests/wasm.rs"]
+mod tests;
+
 // ── Config ────────────────────────────────────────────────────────────────────
 
 const ALLOWED_HOSTS: &[&str] = &["localhost"];

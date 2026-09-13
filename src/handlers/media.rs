@@ -14,6 +14,10 @@ use crate::services::media as media_service;
 use crate::services::plugin::PluginError;
 use crate::state::AppState;
 
+#[cfg(test)]
+#[path = "tests/media.rs"]
+mod tests;
+
 // ── Config ────────────────────────────────────────────────────────────────────
 
 const REQUESTS_PER_MINUTE: u64 = 60;

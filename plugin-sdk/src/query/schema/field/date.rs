@@ -2,6 +2,10 @@ use serde::{Deserialize, Serialize};
 
 use crate::partial_date::PartialDate;
 
+#[cfg(test)]
+#[path = "tests/date.rs"]
+mod tests;
+
 #[derive(Clone, Serialize, Deserialize)]
 pub struct DateFieldSchema {
     pub variant:       PartialDate,

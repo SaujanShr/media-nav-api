@@ -1,7 +1,11 @@
 use serde::{Deserialize, Serialize};
 use std::{cmp::Ordering, fmt};
 
-#[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq)]
+#[cfg(test)]
+#[path = "tests/partial_date.rs"]
+mod tests;
+
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
 pub enum PartialDate {
     Year(i16),

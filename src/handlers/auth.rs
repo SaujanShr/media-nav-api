@@ -14,6 +14,10 @@ use crate::auth::extractor;
 use crate::services::auth::{self as auth_service, AuthError};
 use crate::state::AppState;
 
+#[cfg(test)]
+#[path = "tests/auth.rs"]
+mod tests;
+
 // ── Config ────────────────────────────────────────────────────────────────────
 
 const REQUESTS_PER_MINUTE: u64 = 10;

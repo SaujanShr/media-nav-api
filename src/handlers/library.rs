@@ -7,6 +7,10 @@ use crate::auth::user_id;
 use crate::services::library_item::{self as library_item_service, LibraryItemError};
 use crate::state::AppState;
 
+#[cfg(test)]
+#[path = "tests/library.rs"]
+mod tests;
+
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 #[derive(Deserialize)]
